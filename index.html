@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Pyramid Golds — The First Class Jewellery. Hallmarked gold and silver jewellery from the heart of Kashmir, Srinagar.">
+<title>Pyramid Golds — The First Class Jewellery</title>
+<link href="https://api.fontshare.com/v2/css?f[]=cabinet-grotesk@400,500,700,800,900&f[]=satoshi@300,400,500,700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@studio-freight/lenis@1.0.42/dist/lenis.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/gsap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/ScrollTrigger.min.js"></script>
+<style>
+:root {
+  --black:#080808;--surface:#0f0f0f;--surface2:#161616;--surface3:#1e1e1e;
+  --border:rgba(201,168,76,0.13);--divider:rgba(255,255,255,0.05);
+  --gold:#c9a84c;--gold2:#e8c97a;--gold-glow:rgba(201,168,76,0.14);
+  --text:#f0ece3;--muted:#8a8478;--faint:#3a3630;
+  --font-display:"Cabinet Grotesk","Helvetica Neue",sans-serif;
+  --font-body:"Satoshi","Inter",sans-serif;
+  --ease-out:cubic-bezier(0.16,1,0.3,1);--dur:200ms;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-padding-top:5rem;-webkit-font-smoothing:antialiased}
+body{font-family:var(--font-body);background:var(--black);color:var(--text);line-height:1.65;overflow-x:hidden;cursor:none}
+img{display:block;max-width:100%;height:auto}
+a{color:inherit;text-decoration:none;cursor:none}
+button{cursor:none;background:none;border:none;font:inherit;color:inherit}
+h1,h2,h3,h4{font-family:var(--font-display);letter-spacing:-0.03em;line-height:1.05}
+@media(hover:none){*{cursor:auto!important}a,button{cursor:pointer!important}}
+
+/* ========= FANCY CURSOR ========= */
+#cur-dot {
+  position:fixed;top:0;left:0;z-index:9999;pointer-events:none;
+  width:8px;height:8px;border-radius:50%;
+  background:linear-gradient(135deg,var(--gold),var(--gold2));
+  transform:translate(-50%,-50%);
+  box-shadow:0 0 12px rgba(201,168,76,0.8),0 0 24px rgba(201,168,76,0.3);
+  transition:width .15s,height .15s,box-shadow .15s;
+}
+#cur-ring {
+  position:fixed;top:0;left:0;z-index:9998;pointer-events:none;
+  width:36px;height:36px;border-radius:50%;
+  border:1px solid rgba(201,168,76,0.5);
+  transform:translate(-50%,-50%);
+  transition:width .35s var(--ease-out),height .35s var(--ease-out),
+             border-color .2s,background .2s,opacity .2s;
+}
+#cur-text {
+  position:fixed;top:0;left:0;z-index:9997;pointer-events:none;
+  font-size:0.55rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;
+  color:var(--black);opacity:0;transform:translate(-50%,-50%);
+  transition:opacity .2s;white-space:nowrap;
+}
+body.ch #cur-dot{width:12px;height:12px;box-shadow:0 0 20px rgba(201,168,76,1),0 0 40px rgba(201,168,76,0.5)}
+body.ch #cur-ring{width:52px;height:52px;border-color:var(--gold);background:rgba(201,168,76,0.06)}
+body.cv #cur-dot{width:48px;height:48px;background:linear-gradient(135deg,var(--gold),var(--gold2));box-shadow:none}
+body.cv #cur-ring{opacity:0}
+body.cv #cur-text{opacity:1}
+@media(hover:none){#cur-dot,#cur-ring,#cur-text{display:none}}
+
+/* ========= LOADER ========= */
+#loader{position:fixed;inset:0;z-index:10000;background:var(--black);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1.75rem}
+.loader-logo{font-family:var(--font-display);font-size:clamp(2rem,5vw,3.5rem);font-weight:900;letter-spacing:-0.04em;overflow:hidden}
+.loader-logo-main{background:linear-gradient(135deg,var(--gold),var(--gold2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;display:inline-block;transform:translateY(110%)}
+.loader-logo-sub{color:rgba(201,168,76,0.35);display:inline-block;transform:translateY(110%)}
+.loader-tag{font-size:0.6rem;letter-spacing:0.25em;text-transform:uppercase;color:var(--muted);opacity:0}
+.loader-bar-wrap{width:160px;height:1px;background:var(--faint);border-radius:4px;overflow:hidden}
+.loader-bar{height:100%;width:0%;background:linear-gradient(90deg,var(--gold),var(--gold2));border-radius:4px}
+
+/* ========= NAV ========= */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:1.75rem 3rem;transition:all .5s ease}
+nav.scrolled{background:rgba(8,8,8,0.92);backdrop-filter:blur(24px);border-bottom:1px solid var(--border);padding:1rem 3rem}
+.nav-logo{display:flex;flex-direction:column;gap:0.1rem}
+.nav-logo-name{font-family:var(--font-display);font-size:1.15rem;font-weight:900;letter-spacing:-0.03em;background:linear-gradient(135deg,var(--gold),var(--gold2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1}
+.nav-logo-tag{font-size:0.48rem;letter-spacing:0.22em;text-transform:uppercase;color:var(--muted);line-height:1}
+.nav-links{display:flex;gap:2.5rem;align-items:center}
+.nav-links a{font-size:0.75rem;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);position:relative;transition:color var(--dur)}
+.nav-links a::after{content:'';position:absolute;bottom:-3px;left:0;width:0;height:1px;background:var(--gold);transition:width .3s var(--ease-out)}
+.nav-links a:hover{color:var(--text)}
+.nav-links a:hover::after{width:100%}
+.nav-cta{padding:0.6rem 1.5rem;background:linear-gradient(135deg,var(--gold),var(--gold2));color:var(--black);font-size:0.7rem;font-weight:800;letter-spacing:0.1em;text-transform:uppercase;border-radius:999px;transition:all var(--dur) var(--ease-out);white-space:nowrap}
+.nav-cta:hover{transform:translateY(-2px);box-shadow:0 8px 28px var(--gold-glow)}
+
+/* ========= HERO ========= */
+#hero{min-height:100dvh;display:flex;flex-direction:column;justify-content:flex-end;padding:7rem 3rem 6rem;position:relative;overflow:hidden}
+.hero-bg{position:absolute;inset:0;background:radial-gradient(ellipse 60% 60% at 70% 30%,rgba(201,168,76,0.07),transparent),radial-gradient(ellipse 40% 50% at 20% 80%,rgba(201,168,76,0.04),transparent)}
+.hero-grain{position:absolute;inset:0;opacity:0.025;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+.hero-vline{position:absolute;top:0;left:50%;width:1px;height:100%;background:linear-gradient(to bottom,transparent,rgba(201,168,76,0.12),transparent)}
+.hero-eyebrow{display:flex;align-items:center;gap:1rem;margin-bottom:2rem;opacity:0}
+.hero-tag{font-size:0.6rem;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:var(--gold);border:1px solid rgba(201,168,76,0.25);background:rgba(201,168,76,0.06);border-radius:999px;padding:4px 14px}
+.hero-dot{width:5px;height:5px;border-radius:50%;background:var(--gold);box-shadow:0 0 10px var(--gold);animation:gdot 2.5s ease infinite;flex-shrink:0}
+@keyframes gdot{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.7)}}
+.hero-h{font-size:clamp(3.5rem,10vw,12rem);font-weight:900;letter-spacing:-0.055em;line-height:0.9;position:relative;z-index:1}
+.hero-h .line{display:block;overflow:hidden}
+.hero-h .word{display:inline-block;transform:translateY(110%);opacity:0}
+.gold-text{background:linear-gradient(135deg,var(--gold),var(--gold2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.hero-bottom{display:grid;grid-template-columns:1fr 1fr;gap:3rem;align-items:flex-end;margin-top:3rem;opacity:0}
+.hero-desc{font-size:clamp(0.9rem,1.1vw,1.1rem);color:var(--muted);line-height:1.85;max-width:42ch}
+.hero-actions{display:flex;gap:1rem;flex-wrap:wrap;justify-content:flex-end}
+.btn-primary{display:flex;align-items:center;gap:0.5rem;padding:1rem 2.2rem;background:linear-gradient(135deg,var(--gold),var(--gold2));color:var(--black);font-weight:800;font-size:0.75rem;letter-spacing:0.08em;text-transform:uppercase;border-radius:999px;transition:all var(--dur) var(--ease-out)}
+.btn-primary:hover{transform:translateY(-3px);box-shadow:0 16px 40px rgba(201,168,76,0.3)}
+.btn-ghost{display:flex;align-items:center;gap:0.5rem;padding:1rem 2.2rem;border:1px solid var(--border);color:var(--muted);font-size:0.75rem;letter-spacing:0.08em;text-transform:uppercase;font-weight:600;border-radius:999px;transition:all var(--dur) var(--ease-out)}
+.btn-ghost:hover{border-color:var(--gold);color:var(--text);transform:translateY(-3px)}
+
+/* ========= TRUST BAR ========= */
+.trust-bar{border-top:1px solid var(--divider);border-bottom:1px solid var(--divider);padding:1.5rem 3rem;display:flex;justify-content:center;align-items:center;gap:4rem;flex-wrap:wrap;background:var(--surface)}
+.trust-item{display:flex;flex-direction:column;align-items:center;gap:0.2rem;opacity:0;transform:translateY(20px)}
+.trust-num{font-family:var(--font-display);font-size:1.75rem;font-weight:900;letter-spacing:-0.04em;background:linear-gradient(135deg,var(--gold),var(--gold2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.trust-label{font-size:0.6rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--muted)}
+.trust-divider{width:1px;height:36px;background:var(--border)}
+
+/* ========= COLLECTIONS ========= */
+#collections{padding:clamp(4rem,8vw,7rem) 3rem;border-top:1px solid var(--divider)}
+.s-label{font-size:0.6rem;font-weight:700;letter-spacing:0.2em;text-transform:uppercase;color:var(--gold);display:flex;align-items:center;gap:0.75rem;margin-bottom:1.5rem}
+.s-label::before{content:'';width:22px;height:1px;background:var(--gold)}
+.s-head{font-size:clamp(2.2rem,4.5vw,4.5rem);font-weight:900;letter-spacing:-0.04em;margin-bottom:1rem}
+.s-sub{color:var(--muted);font-size:1rem;line-height:1.85;max-width:52ch;margin-bottom:4rem}
+.coll-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem}
+.coll-card{position:relative;overflow:hidden;border-radius:1rem;border:1px solid var(--border);background:var(--surface);opacity:0;transform:translateY(40px);transition:border-color var(--dur)}
+.coll-card:hover{border-color:rgba(201,168,76,0.5)}
+.coll-card-img{width:100%;aspect-ratio:1;object-fit:cover;transition:transform .8s var(--ease-out),filter .4s ease;filter:brightness(0.88)}
+.coll-card:hover .coll-card-img{transform:scale(1.06);filter:brightness(1.05)}
+.coll-card-body{padding:1.5rem}
+.coll-card-cat{font-size:0.58rem;letter-spacing:0.18em;text-transform:uppercase;color:var(--gold);font-weight:700;margin-bottom:0.5rem}
+.coll-card-name{font-family:var(--font-display);font-size:1.25rem;font-weight:800;letter-spacing:-0.02em;margin-bottom:0.4rem}
+.coll-card-desc{font-size:0.82rem;color:var(--muted);line-height:1.75}
+.coll-shine{position:absolute;inset:0;background:linear-gradient(135deg,rgba(201,168,76,0.07),transparent 60%);opacity:0;transition:opacity .4s;pointer-events:none}
+.coll-card:hover .coll-shine{opacity:1}
+
+/* ========= ABOUT ========= */
+#about{padding:clamp(4rem,8vw,7rem) 3rem;background:var(--surface);border-top:1px solid var(--divider)}
+.about-grid{display:grid;grid-template-columns:1fr 1fr;gap:6rem;align-items:center}
+.about-visual{position:relative;border-radius:1.25rem;overflow:hidden;border:1px solid var(--border);aspect-ratio:3/4}
+.about-visual-img{width:100%;height:100%;object-fit:cover;filter:brightness(0.82)}
+.about-visual-overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(8,8,8,0.85) 0%,transparent 55%)}
+.about-visual-card{position:absolute;bottom:1.5rem;left:1.5rem;right:1.5rem;padding:1.1rem 1.25rem;background:rgba(8,8,8,0.88);backdrop-filter:blur(16px);border:1px solid var(--border);border-radius:0.75rem}
+.about-visual-card-title{font-family:var(--font-display);font-size:1rem;font-weight:800;background:linear-gradient(135deg,var(--gold),var(--gold2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.about-visual-card-sub{font-size:0.68rem;color:var(--muted);margin-top:0.2rem}
+.about-body{font-size:1rem;color:var(--muted);line-height:1.9}
+.about-body p+p{margin-top:1.25rem}
+.about-body strong{color:var(--text);font-weight:600}
+.about-body .hi{color:var(--gold);font-weight:500}
+.pillars{display:flex;flex-direction:column;gap:1rem;margin-top:2.5rem}
+.pillar{display:flex;align-items:flex-start;gap:1rem;padding:1.25rem;border:1px solid var(--border);border-radius:0.75rem;background:var(--surface2);transition:border-color var(--dur),transform var(--dur)}
+.pillar:hover{border-color:var(--gold);transform:translateX(4px)}
+.pillar-icon{width:34px;height:34px;flex-shrink:0;background:var(--gold-glow);border-radius:0.5rem;display:flex;align-items:center;justify-content:center;font-size:14px;color:var(--gold);font-weight:700}
+.pillar-title{font-weight:700;font-size:0.88rem;margin-bottom:0.2rem}
+.pillar-desc{font-size:0.78rem;color:var(--muted);line-height:1.65}
+
+/* ========= CONTACT ========= */
+#contact{padding:clamp(4rem,8vw,7rem) 3rem;border-top:1px solid var(--divider)}
+.contact-grid{display:grid;grid-template-columns:1fr 1fr;gap:6rem;align-items:start}
+.contact-big{font-size:clamp(2.2rem,4.5vw,4.5rem);font-weight:900;letter-spacing:-0.04em;line-height:0.95;margin-bottom:1.5rem}
+.contact-sub{color:var(--muted);font-size:1rem;line-height:1.85;max-width:42ch;margin-bottom:2.5rem}
+.contact-links{display:flex;flex-direction:column;gap:1rem}
+.clink{display:flex;align-items:center;gap:1.25rem;padding:1.25rem 1.5rem;border:1px solid var(--border);border-radius:0.875rem;background:var(--surface);transition:all var(--dur) var(--ease-out);position:relative;overflow:hidden}
+.clink::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,var(--gold-glow),transparent);opacity:0;transition:opacity .3s}
+.clink:hover{border-color:var(--gold);transform:translateX(6px)}
+.clink:hover::before{opacity:1}
+.clink-icon{width:42px;height:42px;flex-shrink:0;background:var(--gold-glow);border:1px solid var(--border);border-radius:0.6rem;display:flex;align-items:center;justify-content:center;font-size:17px}
+.clink-label{font-size:0.6rem;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:0.2rem}
+.clink-val{font-weight:700;font-size:0.92rem}
+.map-wrap{border-radius:1rem;overflow:hidden;border:1px solid var(--border);height:360px;background:var(--surface2);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:0.75rem;transition:border-color var(--dur);text-decoration:none}
+.map-wrap:hover{border-color:var(--gold)}
+.map-pin{font-size:2.25rem}
+.map-title{font-family:var(--font-display);font-size:1.05rem;font-weight:800}
+.map-sub{font-size:0.78rem;color:var(--muted)}
+.map-btn{margin-top:0.5rem;padding:0.55rem 1.4rem;background:var(--gold-glow);border:1px solid var(--border);border-radius:999px;font-size:0.7rem;font-weight:600;color:var(--gold);letter-spacing:0.08em;text-transform:uppercase}
+
+footer{padding:1.75rem 3rem;border-top:1px solid var(--divider);display:flex;justify-content:space-between;align-items:center;font-size:0.7rem;color:var(--faint);background:var(--surface)}
+.footer-logo{font-family:var(--font-display);font-size:0.95rem;font-weight:900;letter-spacing:-0.03em;background:linear-gradient(135deg,var(--gold),var(--gold2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.footer-links{display:flex;gap:2rem}
+.footer-links a{color:var(--muted);font-size:0.7rem;transition:color var(--dur)}
+.footer-links a:hover{color:var(--gold)}
+
+@media(max-width:900px){
+  nav{padding:1.25rem 1.5rem}nav.scrolled{padding:0.875rem 1.5rem}.nav-links{display:none}
+  #hero{padding:6rem 1.5rem 4rem}.hero-bottom{grid-template-columns:1fr;gap:1.5rem}.hero-actions{justify-content:flex-start}
+  .trust-bar{gap:2rem;padding:1.5rem}.trust-divider{display:none}
+  #collections,#about,#contact{padding:3rem 1.5rem}
+  .coll-grid{grid-template-columns:1fr 1fr}
+  .about-grid{grid-template-columns:1fr;gap:3rem}.about-visual{aspect-ratio:4/3}
+  .contact-grid{grid-template-columns:1fr;gap:3rem}
+  footer{flex-direction:column;gap:1rem;text-align:center;padding:1.5rem}.footer-links{flex-wrap:wrap;justify-content:center}
+}
+@media(max-width:560px){.coll-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<div id="cur-dot"></div>
+<div id="cur-ring"></div>
+<div id="cur-text">VIEW</div>
+
+<div id="loader">
+  <div class="loader-logo">
+    <span class="loader-logo-main">PYRAMID</span>
+    <span class="loader-logo-sub"> GOLDS</span>
+  </div>
+  <div class="loader-tag">The First Class Jewellery</div>
+  <div class="loader-bar-wrap"><div class="loader-bar" id="lbar"></div></div>
+</div>
+
+<nav id="nav">
+  <div class="nav-logo">
+    <div class="nav-logo-name">PYRAMID GOLDS</div>
+    <div class="nav-logo-tag">The First Class Jewellery</div>
+  </div>
+  <div class="nav-links">
+    <a href="#collections">Collections</a>
+    <a href="#about">Our Story</a>
+    <a href="#contact">Find Us</a>
+  </div>
+  <a href="https://wa.me/918082556365" target="_blank" rel="noopener" class="nav-cta">WhatsApp Us</a>
+</nav>
+
+<section id="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-grain"></div>
+  <div class="hero-vline"></div>
+  <div style="position:relative;z-index:1">
+    <div class="hero-eyebrow" id="eyebrow">
+      <div class="hero-dot"></div>
+      <div class="hero-tag">Srinagar, Kashmir</div>
+      <div class="hero-tag">Hallmarked</div>
+      <div class="hero-tag">Authentic</div>
+    </div>
+    <h1 class="hero-h" id="hero-h">
+      <span class="line"><span class="word">The First</span></span>
+      <span class="line"><span class="word gold-text">Class</span></span>
+      <span class="line"><span class="word">Jewellery.</span></span>
+    </h1>
+    <div class="hero-bottom" id="hbottom">
+      <p class="hero-desc">Pyramid Golds brings you gold and silver jewellery crafted to last. Each piece is hallmarked, authenticated, and personally chosen. Based in Srinagar, trusted across Kashmir.</p>
+      <div class="hero-actions">
+        <a href="#collections" class="btn-primary">View Collections</a>
+        <a href="https://wa.me/918082556365" target="_blank" rel="noopener" class="btn-ghost">Chat on WhatsApp</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="trust-bar">
+  <div class="trust-item"><div class="trust-num">168+</div><div class="trust-label">Pieces Showcased</div></div>
+  <div class="trust-divider"></div>
+  <div class="trust-item"><div class="trust-num">3K+</div><div class="trust-label">Happy Customers</div></div>
+  <div class="trust-divider"></div>
+  <div class="trust-item"><div class="trust-num">100%</div><div class="trust-label">Hallmarked</div></div>
+  <div class="trust-divider"></div>
+  <div class="trust-item"><div class="trust-num">Gold</div><div class="trust-label">and Silver</div></div>
+</div>
+
+<section id="collections">
+  <div class="s-label r">Collections</div>
+  <h2 class="s-head r">Crafted to be worn,<br>remembered.</h2>
+  <p class="s-sub r">Every piece we carry is selected for its quality and craftsmanship. From delicate gold earrings to bold silver bangles, there is something here for every occasion and every person.</p>
+  <div class="coll-grid">
+
+    <div class="coll-card" data-cursor="VIEW">
+      <div class="coll-shine"></div>
+      <img src="rings_earrings.jpg" alt="Gold Rings and Earrings" class="coll-card-img">
+      <div class="coll-card-body">
+        <div class="coll-card-cat">Gold Collection</div>
+        <div class="coll-card-name">Rings and Earrings</div>
+        <div class="coll-card-desc">A hand-engraved gold ring paired with a classic hoop earring — each piece displayed in velvet, each piece made to be kept.</div>
+      </div>
+    </div>
+
+    <div class="coll-card" data-cursor="VIEW">
+      <div class="coll-shine"></div>
+      <img src="rings_earrings2.jpg" alt="Gold Ring and Hoop Earrings" class="coll-card-img">
+      <div class="coll-card-body">
+        <div class="coll-card-cat">Gold Collection</div>
+        <div class="coll-card-name">Gold Hoop Earrings</div>
+        <div class="coll-card-desc">Classic gold hoops with beaded detailing, sitting alongside a bold gold ring. Simple in form, rich in finish.</div>
+      </div>
+    </div>
+
+    <div class="coll-card" data-cursor="VIEW">
+      <div class="coll-shine"></div>
+      <img src="gold_bracelets.jpg" alt="Gold Ladies Bracelets" class="coll-card-img">
+      <div class="coll-card-body">
+        <div class="coll-card-cat">Gold Collection</div>
+        <div class="coll-card-name">Ladies Gold Bracelets</div>
+        <div class="coll-card-desc">Four handcrafted gold bracelets laid side by side — beaded, sculpted, filigree, and flat link. Each one tells a different story.</div>
+      </div>
+    </div>
+
+    <div class="coll-card" data-cursor="VIEW">
+      <div class="coll-shine"></div>
+      <img src="gold_chain.jpg" alt="Gold Cuban Chain" class="coll-card-img">
+      <div class="coll-card-body">
+        <div class="coll-card-cat">Gold Collection</div>
+        <div class="coll-card-name">Cuban Link Bracelet</div>
+        <div class="coll-card-desc">A clean Cuban chain in warm gold tone. Solid links, precise finish, and the kind of weight that feels exactly right on the wrist.</div>
+      </div>
+    </div>
+
+    <div class="coll-card" data-cursor="VIEW">
+      <div class="coll-shine"></div>
+      <img src="silver_bangle.jpg" alt="Silver Floral Bangle" class="coll-card-img">
+      <div class="coll-card-body">
+        <div class="coll-card-cat">Silver Collection</div>
+        <div class="coll-card-name">Floral Silver Bangle</div>
+        <div class="coll-card-desc">An open silver bangle finished with twin crystal flower ends. Lightweight, graceful, and effortlessly feminine.</div>
+      </div>
+    </div>
+
+    <div class="coll-card" data-cursor="VISIT" style="display:flex;flex-direction:column;justify-content:center;align-items:center;padding:3rem;text-align:center;min-height:340px">
+      <div class="coll-shine"></div>
+      <div style="font-family:var(--font-display);font-size:2.25rem;font-weight:900;background:linear-gradient(135deg,var(--gold),var(--gold2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:1rem;line-height:1.1">New pieces<br>every week.</div>
+      <p style="font-size:0.82rem;color:var(--muted);line-height:1.8;margin-bottom:1.75rem;max-width:26ch">Follow us on Instagram or send a message on WhatsApp to see the latest arrivals before anyone else.</p>
+      <a href="https://instagram.com/pyramidgolds" target="_blank" rel="noopener" class="btn-primary" style="font-size:0.68rem">See on Instagram</a>
+    </div>
+
+  </div>
+</section>
+
+<section id="about">
+  <div class="about-grid">
+    <div class="about-visual r">
+      <img src="gold_bracelets.jpg" alt="Pyramid Golds Collection" class="about-visual-img">
+      <div class="about-visual-overlay"></div>
+      <div class="about-visual-card">
+        <div class="about-visual-card-title">Pyramid Golds</div>
+        <div class="about-visual-card-sub">Srinagar, Kashmir — Hallmarked and Trusted</div>
+      </div>
+    </div>
+    <div>
+      <div class="s-label r">Our Story</div>
+      <h2 class="s-head r">Jewellery rooted<br>in Kashmir.</h2>
+      <div class="about-body r">
+        <p>Pyramid Golds was built on one simple belief — that <strong>quality jewellery should be accessible</strong>, verifiable, and beautiful. Every piece we carry is hallmarked and authentic, because we think you deserve to know exactly what you are wearing.</p>
+        <p>We are based in <span class="hi">Srinagar, Kashmir</span> — a place with a long and proud tradition of fine craftsmanship. That heritage runs through everything we do, from the pieces we select to the way we present them.</p>
+        <p>Whether you are buying for yourself or for someone you love, we take that seriously. <strong>This is not just jewellery. It is something you will keep.</strong></p>
+      </div>
+      <div class="pillars r">
+        <div class="pillar">
+          <div class="pillar-icon">&#10003;</div>
+          <div><div class="pillar-title">Hallmark Certified</div><div class="pillar-desc">Every gold and silver piece carries official hallmark certification. Your guarantee of purity, every single time.</div></div>
+        </div>
+        <div class="pillar">
+          <div class="pillar-icon">&#9670;</div>
+          <div><div class="pillar-title">Personally Curated</div><div class="pillar-desc">We handpick each item in our collection. No mass production, no shortcuts — just pieces worth owning.</div></div>
+        </div>
+        <div class="pillar">
+          <div class="pillar-icon">&#9733;</div>
+          <div><div class="pillar-title">Trusted in Kashmir</div><div class="pillar-desc">Over 3,000 customers and growing. Our reputation is built on honesty and the quality of what we sell.</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="contact">
+  <div class="contact-grid">
+    <div>
+      <div class="s-label r">Find Us</div>
+      <h2 class="contact-big r">Come see us<br>in <span class="gold-text">Srinagar.</span></h2>
+      <p class="contact-sub r">We are always happy to help — whether you have a question about a piece, need help with sizing, or just want to browse. Reach out any way that suits you.</p>
+      <div class="contact-links r">
+        <a href="https://wa.me/918082556365" target="_blank" rel="noopener" class="clink">
+          <div class="clink-icon">&#128241;</div>
+          <div><div class="clink-label">WhatsApp</div><div class="clink-val">+91 80825 56365</div></div>
+        </a>
+        <a href="https://instagram.com/pyramidgolds" target="_blank" rel="noopener" class="clink">
+          <div class="clink-icon">&#128247;</div>
+          <div><div class="clink-label">Instagram</div><div class="clink-val">@pyramidgolds</div></div>
+        </a>
+        <a href="https://maps.app.goo.gl/72ELvt6b9xiNUhw47" target="_blank" rel="noopener" class="clink">
+          <div class="clink-icon">&#128205;</div>
+          <div><div class="clink-label">Location</div><div class="clink-val">Srinagar, Kashmir</div></div>
+        </a>
+      </div>
+    </div>
+    <div>
+      <a href="https://maps.app.goo.gl/72ELvt6b9xiNUhw47" target="_blank" rel="noopener" class="map-wrap r">
+        <div class="map-pin">&#128205;</div>
+        <div class="map-title">Pyramid Golds</div>
+        <div class="map-sub">Srinagar, Jammu and Kashmir</div>
+        <div class="map-btn">Open in Google Maps</div>
+      </a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="footer-logo">PYRAMID GOLDS</div>
+  <div>The First Class Jewellery — Srinagar, Kashmir</div>
+  <div class="footer-links">
+    <a href="https://instagram.com/pyramidgolds" target="_blank" rel="noopener">Instagram</a>
+    <a href="https://wa.me/918082556365" target="_blank" rel="noopener">WhatsApp</a>
+    <a href="https://maps.app.goo.gl/72ELvt6b9xiNUhw47" target="_blank" rel="noopener">Location</a>
+  </div>
+</footer>
+
+<script>
+gsap.registerPlugin(ScrollTrigger);
+const lenis=new Lenis({lerp:.08,smoothWheel:true});
+lenis.on('scroll',ScrollTrigger.update);
+gsap.ticker.add(t=>lenis.raf(t*1000));
+gsap.ticker.lagSmoothing(0);
+
+/* ---- FANCY CURSOR ---- */
+const curDot=document.getElementById('cur-dot');
+const curRing=document.getElementById('cur-ring');
+const curText=document.getElementById('cur-text');
+let mx=0,my=0,rx=0,ry=0;
+
+document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY});
+
+(function loop(){
+  curDot.style.left=mx+'px';curDot.style.top=my+'px';
+  rx+=(mx-rx)*.1;ry+=(my-ry)*.1;
+  curRing.style.left=rx+'px';curRing.style.top=ry+'px';
+  curText.style.left=mx+'px';curText.style.top=my+'px';
+  requestAnimationFrame(loop);
+})();
+
+document.querySelectorAll('a,button,.pillar,.clink').forEach(el=>{
+  el.addEventListener('mouseenter',()=>document.body.classList.add('ch'));
+  el.addEventListener('mouseleave',()=>document.body.classList.remove('ch'));
+});
+
+document.querySelectorAll('[data-cursor]').forEach(el=>{
+  const label=el.dataset.cursor;
+  el.addEventListener('mouseenter',()=>{
+    curText.textContent=label;
+    document.body.classList.add('cv');
+  });
+  el.addEventListener('mouseleave',()=>document.body.classList.remove('cv'));
+});
+
+/* ---- LOADER ---- */
+const lbar=document.getElementById('lbar');
+let prog=0;
+gsap.to('.loader-logo-main',{y:0,duration:.8,ease:'cubic-bezier(0.16,1,0.3,1)',delay:.1});
+gsap.to('.loader-logo-sub',{y:0,duration:.8,ease:'cubic-bezier(0.16,1,0.3,1)',delay:.22});
+const fill=setInterval(()=>{
+  prog=Math.min(prog+Math.random()*18,100);
+  lbar.style.width=prog+'%';
+  if(prog>=100){clearInterval(fill);startSite();}
+},80);
+
+function startSite(){
+  gsap.to('.loader-tag',{opacity:1,duration:.4});
+  gsap.to('#loader',{opacity:0,y:-24,duration:.7,delay:.5,ease:'power2.in',onComplete:()=>{
+    document.getElementById('loader').style.display='none';
+    initHero();
+  }});
+}
+
+function initHero(){
+  const words=document.querySelectorAll('.hero-h .word');
+  gsap.set('#hbottom',{y:30,opacity:0});
+  gsap.set('#eyebrow',{y:20,opacity:0});
+  gsap.timeline()
+    .to(words,{y:'0%',opacity:1,duration:1.2,stagger:.13,ease:'cubic-bezier(0.16,1,0.3,1)'},0.1)
+    .to('#eyebrow',{opacity:1,y:0,duration:.8,ease:'power3.out'},0.4)
+    .to('#hbottom',{opacity:1,y:0,duration:.8,ease:'power3.out'},0.65);
+}
+
+/* ---- SCROLL REVEALS ---- */
+document.querySelectorAll('.r').forEach(el=>{
+  gsap.set(el,{opacity:0,y:28});
+  ScrollTrigger.create({trigger:el,start:'top 89%',onEnter:()=>gsap.to(el,{opacity:1,y:0,duration:.9,ease:'cubic-bezier(0.16,1,0.3,1)'})});
+});
+document.querySelectorAll('.coll-card').forEach((c,i)=>{
+  ScrollTrigger.create({trigger:c,start:'top 89%',onEnter:()=>gsap.to(c,{opacity:1,y:0,duration:.9,delay:i*.09,ease:'cubic-bezier(0.16,1,0.3,1)'})});
+});
+document.querySelectorAll('.trust-item').forEach((item,i)=>{
+  ScrollTrigger.create({trigger:item,start:'top 90%',onEnter:()=>gsap.to(item,{opacity:1,y:0,duration:.7,delay:i*.1,ease:'power3.out'})});
+});
+
+/* ---- MAGNETIC BUTTONS ---- */
+document.querySelectorAll('.btn-primary,.btn-ghost,.nav-cta').forEach(btn=>{
+  btn.addEventListener('mousemove',e=>{
+    const r=btn.getBoundingClientRect();
+    gsap.to(btn,{x:(e.clientX-r.left-r.width/2)*.22,y:(e.clientY-r.top-r.height/2)*.22,duration:.4,ease:'power3.out'});
+  });
+  btn.addEventListener('mouseleave',()=>gsap.to(btn,{x:0,y:0,duration:.7,ease:'elastic.out(1,.4)'}));
+});
+
+/* ---- NAV SCROLL ---- */
+ScrollTrigger.create({start:60,
+  onEnter:()=>document.getElementById('nav').classList.add('scrolled'),
+  onLeaveBack:()=>document.getElementById('nav').classList.remove('scrolled')
+});
+
+/* ---- PARALLAX HERO ---- */
+gsap.to('.hero-h',{y:-70,ease:'none',scrollTrigger:{trigger:'#hero',start:'top top',end:'bottom top',scrub:true}});
+gsap.to('#eyebrow',{y:-30,ease:'none',scrollTrigger:{trigger:'#hero',start:'top top',end:'bottom top',scrub:true}});
+</script>
+</body>
+</html>
