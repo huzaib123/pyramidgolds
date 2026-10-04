@@ -34,40 +34,48 @@ have to leave the app.
    - Name: `owner_floor_check`, category **Utility**, language **English**
    - Body: `Website visitor: {{1}}. Are you on the store floor now?`
    - Buttons (Quick reply): `Here now`, `Back later`, `Busy`
-4. Webhook (after the Worker is deployed, step 4): callback URL `https://<worker-url>/whatsapp/webhook`,
+4. Webhook (after the Worker is deployed in step 5): callback URL `https://<worker-url>/whatsapp/webhook`,
    verify token = the `WA_VERIFY_TOKEN` you choose, subscribe to the **messages** field.
 5. Note the **App secret** (App settings → Basic). It is used to check that webhook calls really come from Meta.
 
 The owner's number (+60 14-892 7013) receives the pings. It is set in `wrangler.toml` as `WA_OWNER_NUMBER`.
 
-### 4. Deploy the Worker
-```bash
-cd backend
-npx wrangler login
-npx wrangler kv namespace create STATE        # paste the id into wrangler.toml
-npx wrangler secret put OPENAI_API_KEY
-npx wrangler secret put WA_TOKEN
-npx wrangler secret put WA_PHONE_NUMBER_ID
-npx wrangler secret put WA_VERIFY_TOKEN       # any long random string; reuse it in Meta's webhook setup
-npx wrangler secret put WA_APP_SECRET
-npx wrangler secret put GOOGLE_SA_EMAIL
-npx wrangler secret put GOOGLE_SA_KEY         # the private_key value from the JSON key, including BEGIN/END lines
-npx wrangler secret put SHEET_ID
-npx wrangler deploy                           # prints the Worker URL
-```
+### 4. Cloudflare
+1. Create a free Cloudflare account, open **Workers & Pages** once (this creates the `workers.dev` subdomain).
+2. Note the **Account ID** (right-hand side of the Workers & Pages overview).
+3. My Profile → API Tokens → Create Token → template **Edit Cloudflare Workers**. Make sure it also has
+   **Account → Workers KV Storage → Edit**.
 
-### 5. Switch on the widget
-In `index.html`, set the Worker URL on the chat script tag and push:
-```html
-<script src="chat.js" data-api="https://pyramidgolds-chat.<account>.workers.dev" defer></script>
-```
-While `data-api` is empty, the widget stays hidden.
+### 5. Add the keys to GitHub (deploys automatically)
+In the repo: **Settings → Secrets and variables → Actions → New repository secret**, add each of these:
+
+| Secret | Where it comes from |
+| --- | --- |
+| `CLOUDFLARE_API_TOKEN` | Step 4.3 |
+| `CLOUDFLARE_ACCOUNT_ID` | Step 4.2 |
+| `OPENAI_API_KEY` | Step 1 |
+| `GOOGLE_SA_EMAIL` | `client_email` in the service account JSON key |
+| `GOOGLE_SA_KEY` | `private_key` in the JSON key, pasted whole including the BEGIN/END lines |
+| `SHEET_ID` | Step 2.4 |
+| `WA_TOKEN` | Step 3.2 (permanent system-user token) |
+| `WA_PHONE_NUMBER_ID` | Step 3.1 |
+| `WA_APP_SECRET` | Step 3.5 |
+| `WA_VERIFY_TOKEN` | Any long random string you make up; type the same value in Meta's webhook setup |
+
+Then **Actions → Deploy chat backend → Run workflow**. It runs the tests, creates the KV store, deploys the
+Worker, uploads the keys, and switches on the chat button on the site. The run summary shows the WhatsApp
+webhook callback URL to paste into Meta (step 3.4). It also re-deploys on every change to `backend/`.
+
+Manual alternative from a computer: `cd backend && npx wrangler login`, create the KV namespace and paste its id
+into `wrangler.toml`, `npx wrangler secret put <NAME>` for each key above, `npx wrangler deploy`, then set
+`data-api` on the `chat.js` script tag in `index.html` to the Worker URL. While `data-api` is empty, the chat
+button stays hidden.
 
 ## Settings (`wrangler.toml` → `[vars]`)
 | Name | Default | What it does |
 | --- | --- | --- |
 | `OPENAI_MODEL` | `gpt-4o-mini` | OpenAI model |
-| `OPEN_HOUR` / `CLOSE_HOUR` | `10` / `20` | Store hours in India time; no owner pings outside them |
+| `OPEN_HOUR` / `CLOSE_HOUR` | `10` / `21` | Store hours in India time; no owner pings outside them |
 | `PING_TIMEOUT_SEC` | `180` | How long the customer waits for the owner |
 | `WA_OWNER_NUMBER` | `60148927013` | Owner's WhatsApp, digits only |
 | `ALLOWED_ORIGINS` | pyramidgolds.in | Sites allowed to call the Worker |

@@ -171,13 +171,13 @@ async function googleToken(env) {
 export function storeOpen(env, now = new Date()) {
   const ist = new Date(now.getTime() + 5.5 * 3600 * 1000);
   const hour = ist.getUTCHours() + ist.getUTCMinutes() / 60;
-  const open = Number(env.OPEN_HOUR ?? 10), close = Number(env.CLOSE_HOUR ?? 20);
+  const open = Number(env.OPEN_HOUR ?? 10), close = Number(env.CLOSE_HOUR ?? 21);
   return hour >= open && hour < close;
 }
 
 async function notifyOwner(env, { ip, sessionId, summary = '' }) {
   if (!storeOpen(env)) {
-    return { ok: false, error: `The store is closed now (open ${env.OPEN_HOUR ?? 10}:00 to ${env.CLOSE_HOUR ?? 20}:00 IST). Offer to have the team contact the customer.` };
+    return { ok: false, error: `The store is closed now (open ${env.OPEN_HOUR ?? 10}:00 to ${env.CLOSE_HOUR ?? 21}:00 IST). Offer to have the team contact the customer.` };
   }
   if (await env.STATE.get(`pingsess:${sessionId}`)) {
     return { ok: false, error: 'The owner was already checked in this chat. Offer to have the team contact the customer.' };
