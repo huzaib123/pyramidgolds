@@ -73,7 +73,7 @@ jobs:
             SHEET_WEBHOOK_URL
             SHEET_WEBHOOK_SECRET
         env:
-          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          OPENAI_API_KEY: ${{ secrets.API_KEY_OPEN_AI }}
           WA_TOKEN: ${{ secrets.WA_TOKEN }}
           WA_PHONE_NUMBER_ID: ${{ secrets.WA_PHONE_NUMBER_ID }}
           WA_VERIFY_TOKEN: ${{ secrets.WA_VERIFY_TOKEN }}

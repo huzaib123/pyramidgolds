@@ -61,7 +61,7 @@ In the repo: **Settings → Secrets and variables → Actions → New repository
 | --- | --- |
 | `CLOUDFLARE_API_TOKEN` | Step 4.3 |
 | `CLOUDFLARE_ACCOUNT_ID` | Step 4.2 |
-| `OPENAI_API_KEY` | Step 1 |
+| `API_KEY_OPEN_AI` | Step 1 (the OpenAI key) |
 | `SHEET_WEBHOOK_URL` | Step 2.5 |
 | `SHEET_WEBHOOK_SECRET` | Step 2.2 |
 | `WA_TOKEN` | Step 3.2 (permanent system-user token) |
