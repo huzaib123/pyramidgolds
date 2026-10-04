@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="description" content="Pyramid Golds — The First Class Jewellery. Hallmarked gold and silver jewellery from the heart of Kashmir, Srinagar.">
-<title>Pyramid Golds — The First Class Jewellery</title>
+<meta name="description" content="Pyramid Golds Bullion — MMTC-PAMP gold bars, biscuits and coins in 24K 999.9 certified purity. Srinagar, Kashmir.">
+<title>Gold Bullion — Pyramid Golds</title>
 <link href="https://api.fontshare.com/v2/css?f[]=cabinet-grotesk@400,500,700,800,900&f[]=satoshi@300,400,500,700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@studio-freight/lenis@1.0.42/dist/lenis.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/gsap.min.js"></script>
@@ -167,10 +167,6 @@ nav.scrolled{background:rgba(8,8,8,0.92);backdrop-filter:blur(24px);border-botto
 .map-sub{font-size:0.78rem;color:var(--muted)}
 .map-btn{margin-top:0.5rem;padding:0.55rem 1.4rem;background:var(--gold-glow);border:1px solid var(--border);border-radius:999px;font-size:0.7rem;font-weight:600;color:var(--gold);letter-spacing:0.08em;text-transform:uppercase}
 
-.bullion-band{padding:clamp(3rem,6vw,5rem) 3rem;border-top:1px solid var(--divider);background:var(--surface);display:flex;align-items:center;justify-content:space-between;gap:3rem;flex-wrap:wrap}
-.bullion-band .s-head{margin-bottom:0.75rem}
-.bullion-band .s-sub{margin-bottom:0}
-
 footer{padding:1.75rem 3rem;border-top:1px solid var(--divider);display:flex;justify-content:space-between;align-items:center;font-size:0.7rem;color:var(--faint);background:var(--surface)}
 .footer-logo{font-family:var(--font-display);font-size:0.95rem;font-weight:900;letter-spacing:-0.03em;background:linear-gradient(135deg,var(--gold),var(--gold2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
 .footer-links{display:flex;gap:2rem}
@@ -181,186 +177,290 @@ footer{padding:1.75rem 3rem;border-top:1px solid var(--divider);display:flex;jus
   nav{padding:1.25rem 1.5rem}nav.scrolled{padding:0.875rem 1.5rem}.nav-links{display:none}
   #hero{padding:6rem 1.5rem 4rem}.hero-bottom{grid-template-columns:1fr;gap:1.5rem}.hero-actions{justify-content:flex-start}
   .trust-bar{gap:2rem;padding:1.5rem}.trust-divider{display:none}
-  #collections,#about,#contact,.bullion-band{padding:3rem 1.5rem}
+  #collections,#about,#contact{padding:3rem 1.5rem}
   .coll-grid{grid-template-columns:1fr 1fr}
   .about-grid{grid-template-columns:1fr;gap:3rem}.about-visual{aspect-ratio:4/3}
   .contact-grid{grid-template-columns:1fr;gap:3rem}
   footer{flex-direction:column;gap:1rem;text-align:center;padding:1.5rem}.footer-links{flex-wrap:wrap;justify-content:center}
 }
 @media(max-width:560px){.coll-grid{grid-template-columns:1fr}}
+/* ========= BULLION PAGE ========= */
+.nav-links a.active{color:var(--text)}
+.nav-links a.active::after{width:100%}
+.nav-logo{cursor:none}
+
+/* hero ingot */
+.hero-ingot-wrap{position:absolute;right:6vw;top:50%;transform:translateY(-58%);z-index:0;perspective:900px;pointer-events:none}
+.hero-ingot.bar{width:clamp(180px,20vw,300px);opacity:0}
+.hero-ingot .stamp-weight{font-size:clamp(2rem,3.4vw,3.2rem)}
+
+/* product cards */
+#products,#denoms,#process,#buyback{padding:clamp(4rem,8vw,7rem) 3rem;border-top:1px solid var(--divider)}
+#denoms,#buyback{background:var(--surface)}
+.prod-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem}
+.prod-stage{aspect-ratio:1;display:flex;align-items:center;justify-content:center;background:radial-gradient(ellipse 55% 55% at 50% 45%,rgba(201,168,76,0.12),transparent 70%),var(--surface2);border-bottom:1px solid var(--border);overflow:hidden}
+
+/* bar / biscuit / coin visuals (pure CSS) */
+.bar{position:relative;width:46%;aspect-ratio:3/5;border-radius:10px;
+  background:linear-gradient(135deg,#7a5e22 0%,#c9a84c 22%,#f3dc96 42%,#c9a84c 58%,#8a6d2b 82%,#5e461a 100%);
+  box-shadow:inset 0 0 0 1px rgba(255,236,180,0.45),inset 0 0 0 7px rgba(94,70,26,0.35),0 30px 60px rgba(0,0,0,0.55),0 0 50px rgba(201,168,76,0.18);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0.35rem;overflow:hidden;transition:transform .8s var(--ease-out)}
+.bar.wide{width:62%;aspect-ratio:5/3;border-radius:8px}
+.bar::after{content:'';position:absolute;top:-60%;left:-80%;width:50%;height:220%;transform:rotate(25deg);background:linear-gradient(90deg,transparent,rgba(255,250,230,0.55),transparent);animation:sweep 4.5s ease-in-out infinite}
+@keyframes sweep{0%,55%{left:-80%}100%{left:160%}}
+.stamp{font-family:var(--font-display);color:rgba(70,50,15,0.82);text-shadow:0 1px 0 rgba(255,240,200,0.5);text-align:center;line-height:1;letter-spacing:0.04em}
+.stamp-brand{font-size:clamp(0.55rem,0.8vw,0.75rem);font-weight:800;letter-spacing:0.18em}
+.stamp-weight{font-size:clamp(1.4rem,2.6vw,2.4rem);font-weight:900}
+.stamp-fine{font-size:clamp(0.5rem,0.7vw,0.65rem);font-weight:700;letter-spacing:0.14em}
+.stamp-rule{width:40%;height:1px;background:rgba(70,50,15,0.4)}
+.coin{position:relative;width:52%;aspect-ratio:1;border-radius:50%;
+  background:radial-gradient(circle at 35% 30%,#f7e3a4 0%,#d9b85f 28%,#b8923d 60%,#7a5e22 100%);
+  box-shadow:inset 0 0 0 5px rgba(94,70,26,0.45),inset 0 0 0 9px rgba(255,236,180,0.35),inset 0 0 0 13px rgba(94,70,26,0.3),0 30px 60px rgba(0,0,0,0.55),0 0 50px rgba(201,168,76,0.18);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0.3rem;overflow:hidden;transition:transform .8s var(--ease-out)}
+.coin::after{content:'';position:absolute;top:-60%;left:-80%;width:40%;height:220%;transform:rotate(25deg);background:linear-gradient(90deg,transparent,rgba(255,250,230,0.5),transparent);animation:sweep 5.2s ease-in-out infinite 1s}
+.coll-card:hover .bar,.coll-card:hover .coin{transform:scale(1.06) rotate(-3deg)}
+.stock-pill{display:inline-flex;align-items:center;gap:0.45rem;font-size:0.58rem;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--gold2);margin-top:1rem}
+.stock-pill .hero-dot{width:6px;height:6px}
+
+/* denominations */
+.denom-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:1rem}
+.denom{display:flex;flex-direction:column;gap:0.5rem;padding:1.5rem 1.25rem;border:1px solid var(--border);border-radius:0.875rem;background:var(--surface2);transition:all var(--dur) var(--ease-out);position:relative;overflow:hidden;opacity:0;transform:translateY(30px)}
+.denom::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,var(--gold-glow),transparent);opacity:0;transition:opacity .3s}
+.denom:hover{border-color:var(--gold);transform:translateY(-4px)}
+.denom:hover::before{opacity:1}
+.denom-w{font-family:var(--font-display);font-size:clamp(1.6rem,2.4vw,2.2rem);font-weight:900;letter-spacing:-0.04em;line-height:1;position:relative}
+.denom-w span{font-size:0.55em;color:var(--gold);margin-left:0.15em}
+.denom-type{font-size:0.7rem;color:var(--muted);position:relative}
+.denom-stock{display:flex;align-items:center;gap:0.4rem;font-size:0.56rem;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--gold);position:relative}
+.denom-stock i{width:5px;height:5px;border-radius:50%;background:var(--gold);box-shadow:0 0 8px var(--gold)}
+.denom-ask{font-size:0.62rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);position:relative;margin-top:0.25rem;transition:color var(--dur)}
+.denom:hover .denom-ask{color:var(--gold2)}
+.note{margin-top:2.5rem;font-size:0.78rem;color:var(--muted);line-height:1.8;max-width:70ch}
+.note strong{color:var(--text);font-weight:600}
+
+/* steps */
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem;counter-reset:step}
+.step{padding:2rem 1.75rem;border:1px solid var(--border);border-radius:1rem;background:var(--surface);position:relative;transition:border-color var(--dur),transform var(--dur)}
+.step:hover{border-color:var(--gold);transform:translateY(-4px)}
+.step-n{font-family:var(--font-display);font-size:3rem;font-weight:900;letter-spacing:-0.05em;line-height:1;margin-bottom:1.25rem}
+.step-t{font-family:var(--font-display);font-size:1.2rem;font-weight:800;letter-spacing:-0.02em;margin-bottom:0.5rem}
+.step-d{font-size:0.82rem;color:var(--muted);line-height:1.75}
+.policy-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-top:1.5rem}
+
+/* buy-back */
+.bb-grid{display:grid;grid-template-columns:1.1fr 0.9fr;gap:6rem;align-items:center}
+.bb-visual{position:relative;aspect-ratio:1;border-radius:1.25rem;border:1px solid var(--border);background:radial-gradient(ellipse 60% 60% at 50% 45%,rgba(201,168,76,0.12),transparent 70%),var(--surface2);display:flex;align-items:center;justify-content:center;overflow:hidden}
+.bb-visual .bar{position:absolute;width:30%;transform:rotate(-12deg) translate(-35%,-6%)}
+.bb-visual .coin{position:absolute;width:34%;transform:translate(45%,30%)}
+
+@media(max-width:900px){
+  .hero-ingot-wrap{display:none}
+  .hero-eyebrow{flex-wrap:wrap;gap:0.6rem}.hero-tag{white-space:nowrap}
+  #products,#denoms,#process,#buyback{padding:3rem 1.5rem}
+  .prod-grid{grid-template-columns:1fr 1fr}
+  .denom-grid{grid-template-columns:repeat(3,1fr)}
+  .steps,.policy-grid{grid-template-columns:1fr}
+  .bb-grid{grid-template-columns:1fr;gap:3rem}
+}
+@media(max-width:560px){
+  .prod-grid{grid-template-columns:1fr}
+  .denom-grid{grid-template-columns:1fr 1fr}
+}
+@media(prefers-reduced-motion:reduce){.bar::after,.coin::after,.hero-dot{animation:none}}
 </style>
 </head>
 <body>
 
 <div id="cur-dot"></div>
 <div id="cur-ring"></div>
-<div id="cur-text">VIEW</div>
+<div id="cur-text">ASK</div>
 
 <div id="loader">
   <div class="loader-logo">
     <span class="loader-logo-main">PYRAMID</span>
-    <span class="loader-logo-sub"> GOLDS</span>
+    <span class="loader-logo-sub"> BULLION</span>
   </div>
-  <div class="loader-tag">The First Class Jewellery</div>
+  <div class="loader-tag">24K 999.9 Certified Gold</div>
   <div class="loader-bar-wrap"><div class="loader-bar" id="lbar"></div></div>
 </div>
 
 <nav id="nav">
-  <div class="nav-logo">
+  <a href="index.html" class="nav-logo">
     <div class="nav-logo-name">PYRAMID GOLDS</div>
     <div class="nav-logo-tag">The First Class Jewellery</div>
-  </div>
+  </a>
   <div class="nav-links">
-    <a href="#collections">Collections</a>
-    <a href="bullion.html">Bullion</a>
-    <a href="#about">Our Story</a>
-    <a href="#contact">Find Us</a>
+    <a href="index.html">Jewellery</a>
+    <a href="#products" class="active">Bullion</a>
+    <a href="#buyback">Buy-back</a>
+    <a href="index.html#contact">Find Us</a>
   </div>
-  <a href="https://wa.me/918082556365" target="_blank" rel="noopener" class="nav-cta">WhatsApp Us</a>
+  <a href="https://wa.me/918082556365?text=Hello%20Pyramid%20Golds%2C%20I%27d%20like%20today%27s%20gold%20bullion%20rate." target="_blank" rel="noopener" class="nav-cta">Get Today's Rate</a>
 </nav>
 
 <section id="hero">
   <div class="hero-bg"></div>
   <div class="hero-grain"></div>
   <div class="hero-vline"></div>
+  <div class="hero-ingot-wrap"><div class="hero-ingot bar" id="ingot">
+    <div class="stamp stamp-brand">MMTC-PAMP</div>
+    <div class="stamp-rule"></div>
+    <div class="stamp stamp-weight">100 g</div>
+    <div class="stamp stamp-fine">FINE GOLD</div>
+    <div class="stamp stamp-fine">999.9</div>
+  </div></div>
   <div style="position:relative;z-index:1">
     <div class="hero-eyebrow" id="eyebrow">
       <div class="hero-dot"></div>
-      <div class="hero-tag">Srinagar, Kashmir</div>
-      <div class="hero-tag">Hallmarked</div>
-      <div class="hero-tag">Authentic</div>
+      <div class="hero-tag">24K 999.9</div>
+      <div class="hero-tag">MMTC-PAMP</div>
+      <div class="hero-tag">Certified</div>
     </div>
     <h1 class="hero-h" id="hero-h">
-      <span class="line"><span class="word">The First</span></span>
-      <span class="line"><span class="word gold-text">Class</span></span>
-      <span class="line"><span class="word">Jewellery.</span></span>
+      <span class="line"><span class="word">Pure Gold.</span></span>
+      <span class="line"><span class="word gold-text">Certified.</span></span>
+      <span class="line"><span class="word">Bullion.</span></span>
     </h1>
     <div class="hero-bottom" id="hbottom">
-      <p class="hero-desc">Pyramid Golds brings you gold and silver jewellery crafted to last. Each piece is hallmarked, authenticated, and personally chosen. Based in Srinagar, trusted across Kashmir.</p>
+      <p class="hero-desc">MMTC-PAMP gold bars, biscuits and coins, from 1 gram to 1 kilogram, in 24K 999.9 certified purity. Sealed, assayed and available at our Srinagar store. Live rates are quoted personally.</p>
       <div class="hero-actions">
-        <a href="#collections" class="btn-primary">View Collections</a>
-        <a href="https://wa.me/918082556365" target="_blank" rel="noopener" class="btn-ghost">Chat on WhatsApp</a>
+        <a href="#denoms" class="btn-primary">See Denominations</a>
+        <a href="https://wa.me/918082556365?text=Hello%20Pyramid%20Golds%2C%20I%27d%20like%20today%27s%20gold%20bullion%20rate." target="_blank" rel="noopener" class="btn-ghost">Get a Live Quote</a>
       </div>
     </div>
   </div>
 </section>
 
 <div class="trust-bar">
-  <div class="trust-item"><div class="trust-num">168+</div><div class="trust-label">Pieces Showcased</div></div>
+  <div class="trust-item"><div class="trust-num">999.9</div><div class="trust-label">Fine Gold</div></div>
   <div class="trust-divider"></div>
-  <div class="trust-item"><div class="trust-num">3K+</div><div class="trust-label">Happy Customers</div></div>
+  <div class="trust-item"><div class="trust-num">24K</div><div class="trust-label">Certified Purity</div></div>
   <div class="trust-divider"></div>
-  <div class="trust-item"><div class="trust-num">100%</div><div class="trust-label">Hallmarked</div></div>
+  <div class="trust-item"><div class="trust-num">1g–1kg</div><div class="trust-label">In Stock</div></div>
   <div class="trust-divider"></div>
-  <div class="trust-item"><div class="trust-num">Gold</div><div class="trust-label">and Silver</div></div>
+  <div class="trust-item"><div class="trust-num">Buy-back</div><div class="trust-label">On Certified Bullion</div></div>
 </div>
 
-<section id="collections">
-  <div class="s-label r">Collections</div>
-  <h2 class="s-head r">Crafted to be worn,<br>remembered.</h2>
-  <p class="s-sub r">Every piece we carry is selected for its quality and craftsmanship. From delicate gold earrings to bold silver bangles, there is something here for every occasion and every person.</p>
-  <div class="coll-grid">
+<section id="products">
+  <div class="s-label r">Bullion</div>
+  <h2 class="s-head r">Bars, biscuits<br>and coins.</h2>
+  <p class="s-sub r">Every piece is MMTC-PAMP certified, sealed in its assay card and traceable by serial number. Choose the form that suits you, from a first gram to a serious holding.</p>
+  <div class="prod-grid">
 
-    <div class="coll-card" data-cursor="VIEW">
+    <div class="coll-card" data-cursor="ASK">
       <div class="coll-shine"></div>
-      <img src="rings_earrings.jpg" alt="Gold Rings and Earrings" class="coll-card-img">
+      <div class="prod-stage"><div class="bar">
+        <div class="stamp stamp-brand">MMTC-PAMP</div>
+        <div class="stamp-rule"></div>
+        <div class="stamp stamp-weight">50 g</div>
+        <div class="stamp stamp-fine">FINE GOLD 999.9</div>
+      </div></div>
       <div class="coll-card-body">
-        <div class="coll-card-cat">Gold Collection</div>
-        <div class="coll-card-name">Rings and Earrings</div>
-        <div class="coll-card-desc">A hand-engraved gold ring paired with a classic hoop earring — each piece displayed in velvet, each piece made to be kept.</div>
+        <div class="coll-card-cat">Gold Bars</div>
+        <div class="coll-card-name">MMTC-PAMP Gold Bars</div>
+        <div class="coll-card-desc">Minted bars in 10 g to 1 kg, sealed in a tamper-proof assay card with weight, purity and serial number.</div>
+        <div class="stock-pill"><div class="hero-dot"></div>Available in stock</div>
       </div>
     </div>
 
-    <div class="coll-card" data-cursor="VIEW">
+    <div class="coll-card" data-cursor="ASK">
       <div class="coll-shine"></div>
-      <img src="gold_chain.jpg" alt="Gold Ring and Hoop Earrings" class="coll-card-img">
+      <div class="prod-stage"><div class="bar wide">
+        <div class="stamp stamp-brand">MMTC-PAMP</div>
+        <div class="stamp stamp-weight">100 g</div>
+        <div class="stamp stamp-fine">24K · 999.9</div>
+      </div></div>
       <div class="coll-card-body">
-        <div class="coll-card-cat">Gold Collection</div>
-        <div class="coll-card-name">Gold Hoop Earrings</div>
-        <div class="coll-card-desc">Classic gold hoops with beaded detailing, sitting alongside a bold gold ring. Simple in form, rich in finish.</div>
+        <div class="coll-card-cat">Gold Biscuits</div>
+        <div class="coll-card-name">MMTC Gold Biscuits</div>
+        <div class="coll-card-desc">The classic biscuit for long-term holding. Simple to store, easy to verify and quick to resell.</div>
+        <div class="stock-pill"><div class="hero-dot"></div>Available in stock</div>
       </div>
     </div>
 
-    <div class="coll-card" data-cursor="VIEW">
+    <div class="coll-card" data-cursor="ASK">
       <div class="coll-shine"></div>
-      <img src="gold_bracelets.jpg" alt="Gold Ladies Bracelets" class="coll-card-img">
+      <div class="prod-stage"><div class="coin">
+        <div class="stamp stamp-brand">MMTC-PAMP</div>
+        <div class="stamp stamp-weight">10 g</div>
+        <div class="stamp stamp-fine">999.9</div>
+      </div></div>
       <div class="coll-card-body">
-        <div class="coll-card-cat">Gold Collection</div>
-        <div class="coll-card-name">Ladies Gold Bracelets</div>
-        <div class="coll-card-desc">Four handcrafted gold bracelets laid side by side — beaded, sculpted, filigree, and flat link. Each one tells a different story.</div>
+        <div class="coll-card-cat">Gold Coins</div>
+        <div class="coll-card-name">MMTC-PAMP Gold Coins</div>
+        <div class="coll-card-desc">From 1 g to 50 g. A meaningful gift for weddings, Eid and Diwali, and an easy way to start saving in gold.</div>
+        <div class="stock-pill"><div class="hero-dot"></div>Available in stock</div>
       </div>
-    </div>
-
-    <div class="coll-card" data-cursor="VIEW">
-      <div class="coll-shine"></div>
-      <img src="rings_earrings2.jpg" alt="Gold Cuban Chain" class="coll-card-img">
-      <div class="coll-card-body">
-        <div class="coll-card-cat">Gold Collection</div>
-        <div class="coll-card-name">Cuban Link Bracelet</div>
-        <div class="coll-card-desc">A clean Cuban chain in warm gold tone. Solid links, precise finish, and the kind of weight that feels exactly right on the wrist.</div>
-      </div>
-    </div>
-
-    <div class="coll-card" data-cursor="VIEW">
-      <div class="coll-shine"></div>
-      <img src="silver_bangle.jpg" alt="Silver Floral Bangle" class="coll-card-img">
-      <div class="coll-card-body">
-        <div class="coll-card-cat">Silver Collection</div>
-        <div class="coll-card-name">Floral Silver Bangle</div>
-        <div class="coll-card-desc">An open silver bangle finished with twin crystal flower ends. Lightweight, graceful, and effortlessly feminine.</div>
-      </div>
-    </div>
-
-    <div class="coll-card" data-cursor="VISIT" style="display:flex;flex-direction:column;justify-content:center;align-items:center;padding:3rem;text-align:center;min-height:340px">
-      <div class="coll-shine"></div>
-      <div style="font-family:var(--font-display);font-size:2.25rem;font-weight:900;background:linear-gradient(135deg,var(--gold),var(--gold2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:1rem;line-height:1.1">New pieces<br>every week.</div>
-      <p style="font-size:0.82rem;color:var(--muted);line-height:1.8;margin-bottom:1.75rem;max-width:26ch">Follow us on Instagram or send a message on WhatsApp to see the latest arrivals before anyone else.</p>
-      <a href="https://instagram.com/pyramidgolds" target="_blank" rel="noopener" class="btn-primary" style="font-size:0.68rem">See on Instagram</a>
     </div>
 
   </div>
 </section>
 
-<section class="bullion-band">
-  <div>
-    <div class="s-label r">New &middot; Gold Bullion</div>
-    <h2 class="s-head r">Certified bars, biscuits<br>and <span class="gold-text">coins.</span></h2>
-    <p class="s-sub r">MMTC-PAMP gold from 1 g to 1 kg in 24K 999.9 purity, with live rates quoted personally and buy-back on certified bullion.</p>
+<section id="denoms">
+  <div class="s-label r">Denominations</div>
+  <h2 class="s-head r">Every weight,<br><span class="gold-text">ready today.</span></h2>
+  <p class="s-sub r">Tap a weight to ask for its live price on WhatsApp. Bullion rates move by the minute, so our team sends you an exact, locked-in quote.</p>
+  <div class="denom-grid">
+    <a class="denom" target="_blank" rel="noopener" href="https://wa.me/918082556365?text=Hello%20Pyramid%20Golds%2C%20please%20share%20today%27s%20price%20for%20a%201%20g%20gold%20coin."><div class="denom-w">1<span>g</span></div><div class="denom-type">Coin</div><div class="denom-stock"><i></i>In stock</div><div class="denom-ask">Ask price &rarr;</div></a>
+    <a class="denom" target="_blank" rel="noopener" href="https://wa.me/918082556365?text=Hello%20Pyramid%20Golds%2C%20please%20share%20today%27s%20price%20for%20a%202%20g%20gold%20coin."><div class="denom-w">2<span>g</span></div><div class="denom-type">Coin</div><div class="denom-stock"><i></i>In stock</div><div class="denom-ask">Ask price &rarr;</div></a>
+    <a class="denom" target="_blank" rel="noopener" href="https://wa.me/918082556365?text=Hello%20Pyramid%20Golds%2C%20please%20share%20today%27s%20price%20for%20a%205%20g%20gold%20coin."><div class="denom-w">5<span>g</span></div><div class="denom-type">Coin</div><div class="denom-stock"><i></i>In stock</div><div class="denom-ask">Ask price &rarr;</div></a>
+    <a class="denom" target="_blank" rel="noopener" href="https://wa.me/918082556365?text=Hello%20Pyramid%20Golds%2C%20please%20share%20today%27s%20price%20for%20an%208%20g%20gold%20coin."><div class="denom-w">8<span>g</span></div><div class="denom-type">Coin</div><div class="denom-stock"><i></i>In stock</div><div class="denom-ask">Ask price &rarr;</div></a>
+    <a class="denom" target="_blank" rel="noopener" href="https://wa.me/918082556365?text=Hello%20Pyramid%20Golds%2C%20please%20share%20today%27s%20price%20for%20a%2010%20g%20gold%20bar%20or%20coin."><div class="denom-w">10<span>g</span></div><div class="denom-type">Bar or coin</div><div class="denom-stock"><i></i>In stock</div><div class="denom-ask">Ask price &rarr;</div></a>
+    <a class="denom" target="_blank" rel="noopener" href="https://wa.me/918082556365?text=Hello%20Pyramid%20Golds%2C%20please%20share%20today%27s%20price%20for%20a%2020%20g%20gold%20bar%20or%20coin."><div class="denom-w">20<span>g</span></div><div class="denom-type">Bar or coin</div><div class="denom-stock"><i></i>In stock</div><div class="denom-ask">Ask price &rarr;</div></a>
+    <a class="denom" target="_blank" rel="noopener" href="https://wa.me/918082556365?text=Hello%20Pyramid%20Golds%2C%20please%20share%20today%27s%20price%20for%20a%2050%20g%20gold%20bar."><div class="denom-w">50<span>g</span></div><div class="denom-type">Bar</div><div class="denom-stock"><i></i>In stock</div><div class="denom-ask">Ask price &rarr;</div></a>
+    <a class="denom" target="_blank" rel="noopener" href="https://wa.me/918082556365?text=Hello%20Pyramid%20Golds%2C%20please%20share%20today%27s%20price%20for%20a%20100%20g%20gold%20bar%20or%20biscuit."><div class="denom-w">100<span>g</span></div><div class="denom-type">Bar or biscuit</div><div class="denom-stock"><i></i>In stock</div><div class="denom-ask">Ask price &rarr;</div></a>
+    <a class="denom" target="_blank" rel="noopener" href="https://wa.me/918082556365?text=Hello%20Pyramid%20Golds%2C%20please%20share%20today%27s%20price%20for%20a%20116.64%20g%20%2810%20tola%29%20gold%20biscuit."><div class="denom-w">10<span>tola</span></div><div class="denom-type">Biscuit, 116.64 g</div><div class="denom-stock"><i></i>In stock</div><div class="denom-ask">Ask price &rarr;</div></a>
+    <a class="denom" target="_blank" rel="noopener" href="https://wa.me/918082556365?text=Hello%20Pyramid%20Golds%2C%20please%20share%20today%27s%20price%20for%20a%201%20kg%20gold%20bar."><div class="denom-w">1<span>kg</span></div><div class="denom-type">Bar</div><div class="denom-stock"><i></i>In stock</div><div class="denom-ask">Ask price &rarr;</div></a>
   </div>
-  <a href="bullion.html" class="btn-primary r">Explore Bullion</a>
+  <p class="note r"><strong>Why no prices here?</strong> Gold rates change through the day. Rather than show a number that is already out of date, our management team sends you an exact, locked-in quote on WhatsApp or email.</p>
 </section>
 
-<section id="about">
-  <div class="about-grid">
-    <div class="about-visual r">
-      <img src="story_bridal.jpg" alt="Pyramid Golds Collection" class="about-visual-img">
-      <div class="about-visual-overlay"></div>
-      <div class="about-visual-card">
-        <div class="about-visual-card-title">Pyramid Golds</div>
-        <div class="about-visual-card-sub">Srinagar, Kashmir — Hallmarked and Trusted</div>
-      </div>
+<section id="process">
+  <div class="s-label r">How to Buy</div>
+  <h2 class="s-head r">Three simple steps.</h2>
+  <p class="s-sub r">Discreet, personal service from the first message to the moment the bullion is in your hands.</p>
+  <div class="steps">
+    <div class="step r"><div class="step-n gold-text">01</div><div class="step-t">Ask for a quote</div><div class="step-d">Tell us the weight and form you want on WhatsApp or email. We reply with the live, locked-in rate.</div></div>
+    <div class="step r"><div class="step-n gold-text">02</div><div class="step-t">Confirm and pay</div><div class="step-d">Pay by secure bank transfer (RTGS/NEFT) or other standard methods. Cash is accepted up to the legal regulatory limit.</div></div>
+    <div class="step r"><div class="step-n gold-text">03</div><div class="step-t">Collect in Srinagar</div><div class="step-d">Collect your sealed, certified bullion at our store with a full GST invoice.</div></div>
+  </div>
+  <div class="policy-grid">
+    <div class="pillar r">
+      <div class="pillar-icon">&#9670;</div>
+      <div><div class="pillar-title">Compliance and KYC</div><div class="pillar-desc">For compliance and security, large bullion transactions may require standard KYC (ID/PAN) at the time of invoicing.</div></div>
     </div>
+    <div class="pillar r">
+      <div class="pillar-icon">&#10003;</div>
+      <div><div class="pillar-title">Discreet by default</div><div class="pillar-desc">Your enquiry goes only to our management team. We never share client details or holdings.</div></div>
+    </div>
+  </div>
+</section>
+
+<section id="buyback">
+  <div class="bb-grid">
     <div>
-      <div class="s-label r">Our Story</div>
-      <h2 class="s-head r">Jewellery rooted<br>in Kashmir.</h2>
+      <div class="s-label r">Buy-back</div>
+      <h2 class="s-head r">We buy back<br><span class="gold-text">certified bullion.</span></h2>
       <div class="about-body r">
-        <p>Pyramid Golds was built on one simple belief — that <strong>quality jewellery should be accessible</strong>, verifiable, and beautiful. Every piece we carry is hallmarked and authentic, because we think you deserve to know exactly what you are wearing.</p>
-        <p>We are based in <span class="hi">Srinagar, Kashmir</span> — a place with a long and proud tradition of fine craftsmanship. That heritage runs through everything we do, from the pieces we select to the way we present them.</p>
-        <p>Whether you are buying for yourself or for someone you love, we take that seriously. <strong>This is not just jewellery. It is something you will keep.</strong></p>
+        <p>We offer <strong>buy-back services on certified bullion</strong> upon physical evaluation at the store.</p>
+        <p>Bring your bar, biscuit or coin with its assay card to our Srinagar store. We check it in front of you and quote a fair rate on the spot.</p>
       </div>
-      <div class="pillars r">
-        <div class="pillar">
-          <div class="pillar-icon">&#10003;</div>
-          <div><div class="pillar-title">Hallmark Certified</div><div class="pillar-desc">Every gold and silver piece carries official hallmark certification. Your guarantee of purity, every single time.</div></div>
-        </div>
-        <div class="pillar">
-          <div class="pillar-icon">&#9670;</div>
-          <div><div class="pillar-title">Personally Curated</div><div class="pillar-desc">We handpick each item in our collection. No mass production, no shortcuts — just pieces worth owning.</div></div>
-        </div>
-        <div class="pillar">
-          <div class="pillar-icon">&#9733;</div>
-          <div><div class="pillar-title">Trusted in Kashmir</div><div class="pillar-desc">Over 3,000 customers and growing. Our reputation is built on honesty and the quality of what we sell.</div></div>
-        </div>
+      <div class="hero-actions r" style="justify-content:flex-start;margin-top:2.5rem">
+        <a href="https://wa.me/918082556365?text=Hello%20Pyramid%20Golds%2C%20I%27d%20like%20to%20ask%20about%20selling%20back%20my%20gold%20bullion." target="_blank" rel="noopener" class="btn-primary">Ask About Buy-back</a>
+        <a href="https://maps.app.goo.gl/72ELvt6b9xiNUhw47" target="_blank" rel="noopener" class="btn-ghost">Visit the Store</a>
+      </div>
+    </div>
+    <div class="bb-visual r" data-cursor="VISIT">
+      <div class="bar">
+        <div class="stamp stamp-brand">MMTC-PAMP</div>
+        <div class="stamp-rule"></div>
+        <div class="stamp stamp-weight">20 g</div>
+        <div class="stamp stamp-fine">999.9</div>
+      </div>
+      <div class="coin">
+        <div class="stamp stamp-brand">MMTC-PAMP</div>
+        <div class="stamp stamp-weight">5 g</div>
+        <div class="stamp stamp-fine">999.9</div>
       </div>
     </div>
   </div>
@@ -369,11 +469,11 @@ footer{padding:1.75rem 3rem;border-top:1px solid var(--divider);display:flex;jus
 <section id="contact">
   <div class="contact-grid">
     <div>
-      <div class="s-label r">Find Us</div>
-      <h2 class="contact-big r">Come see us<br>in <span class="gold-text">Srinagar.</span></h2>
-      <p class="contact-sub r">We are always happy to help — whether you have a question about a piece, need help with sizing, or just want to browse. Reach out any way that suits you.</p>
+      <div class="s-label r">Get a Quote</div>
+      <h2 class="contact-big r">Today's rate,<br><span class="gold-text">personally.</span></h2>
+      <p class="contact-sub r">Share your WhatsApp number or email and our management team will contact you with the best current price.</p>
       <div class="contact-links r">
-        <a href="https://wa.me/918082556365" target="_blank" rel="noopener" class="clink">
+        <a href="https://wa.me/918082556365?text=Hello%20Pyramid%20Golds%2C%20I%27d%20like%20today%27s%20gold%20bullion%20rate." target="_blank" rel="noopener" class="clink">
           <div class="clink-icon">&#128241;</div>
           <div><div class="clink-label">WhatsApp</div><div class="clink-val">+91 80825 56365</div></div>
         </a>
@@ -400,9 +500,9 @@ footer{padding:1.75rem 3rem;border-top:1px solid var(--divider);display:flex;jus
 
 <footer>
   <div class="footer-logo">PYRAMID GOLDS</div>
-  <div>The First Class Jewellery — Srinagar, Kashmir</div>
+  <div>Certified Gold Bullion — Srinagar, Kashmir</div>
   <div class="footer-links">
-    <a href="bullion.html">Bullion</a>
+    <a href="index.html">Jewellery</a>
     <a href="https://instagram.com/pyramidgolds" target="_blank" rel="noopener">Instagram</a>
     <a href="https://wa.me/918082556365" target="_blank" rel="noopener">WhatsApp</a>
     <a href="https://maps.app.goo.gl/72ELvt6b9xiNUhw47" target="_blank" rel="noopener">Location</a>
@@ -415,6 +515,14 @@ const lenis=new Lenis({lerp:.08,smoothWheel:true});
 lenis.on('scroll',ScrollTrigger.update);
 gsap.ticker.add(t=>lenis.raf(t*1000));
 gsap.ticker.lagSmoothing(0);
+
+/* in-page anchors scroll smoothly through Lenis */
+document.querySelectorAll('a[href^="#"]').forEach(a=>{
+  a.addEventListener('click',e=>{
+    const t=document.querySelector(a.getAttribute('href'));
+    if(t){e.preventDefault();lenis.scrollTo(t,{offset:-70});}
+  });
+});
 
 /* ---- FANCY CURSOR ---- */
 const curDot=document.getElementById('cur-dot');
@@ -432,7 +540,7 @@ document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY});
   requestAnimationFrame(loop);
 })();
 
-document.querySelectorAll('a,button,.pillar,.clink').forEach(el=>{
+document.querySelectorAll('a,button,.pillar,.clink,.step').forEach(el=>{
   el.addEventListener('mouseenter',()=>document.body.classList.add('ch'));
   el.addEventListener('mouseleave',()=>document.body.classList.remove('ch'));
 });
@@ -469,10 +577,14 @@ function initHero(){
   const words=document.querySelectorAll('.hero-h .word');
   gsap.set('#hbottom',{y:30,opacity:0});
   gsap.set('#eyebrow',{y:20,opacity:0});
+  gsap.set('#ingot',{y:80,rotateY:-35,rotateZ:8,opacity:0});
   gsap.timeline()
     .to(words,{y:'0%',opacity:1,duration:1.2,stagger:.13,ease:'cubic-bezier(0.16,1,0.3,1)'},0.1)
+    .to('#ingot',{y:0,rotateY:-14,rotateZ:6,opacity:1,duration:1.6,ease:'cubic-bezier(0.16,1,0.3,1)'},0.25)
     .to('#eyebrow',{opacity:1,y:0,duration:.8,ease:'power3.out'},0.4)
     .to('#hbottom',{opacity:1,y:0,duration:.8,ease:'power3.out'},0.65);
+  /* slow float once it has landed */
+  gsap.to('#ingot',{y:-14,duration:3.2,ease:'sine.inOut',yoyo:true,repeat:-1,delay:1.9});
 }
 
 /* ---- SCROLL REVEALS ---- */
@@ -482,6 +594,9 @@ document.querySelectorAll('.r').forEach(el=>{
 });
 document.querySelectorAll('.coll-card').forEach((c,i)=>{
   ScrollTrigger.create({trigger:c,start:'top 89%',onEnter:()=>gsap.to(c,{opacity:1,y:0,duration:.9,delay:i*.09,ease:'cubic-bezier(0.16,1,0.3,1)'})});
+});
+document.querySelectorAll('.denom').forEach((d,i)=>{
+  ScrollTrigger.create({trigger:d,start:'top 92%',onEnter:()=>gsap.to(d,{opacity:1,y:0,duration:.8,delay:(i%5)*.07,ease:'cubic-bezier(0.16,1,0.3,1)'})});
 });
 document.querySelectorAll('.trust-item').forEach((item,i)=>{
   ScrollTrigger.create({trigger:item,start:'top 90%',onEnter:()=>gsap.to(item,{opacity:1,y:0,duration:.7,delay:i*.1,ease:'power3.out'})});
@@ -505,6 +620,7 @@ ScrollTrigger.create({start:60,
 /* ---- PARALLAX HERO ---- */
 gsap.to('.hero-h',{y:-70,ease:'none',scrollTrigger:{trigger:'#hero',start:'top top',end:'bottom top',scrub:true}});
 gsap.to('#eyebrow',{y:-30,ease:'none',scrollTrigger:{trigger:'#hero',start:'top top',end:'bottom top',scrub:true}});
+gsap.to('.hero-ingot-wrap',{yPercent:-30,ease:'none',scrollTrigger:{trigger:'#hero',start:'top top',end:'bottom top',scrub:true}});
 </script>
 </body>
 </html>
