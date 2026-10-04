@@ -1,0 +1,24 @@
+name = "pyramidgolds-chat"
+main = "src/worker.js"
+compatibility_date = "2026-09-01"
+
+# Create with: npx wrangler kv namespace create STATE  (then paste the id below)
+[[kv_namespaces]]
+binding = "STATE"
+id = "REPLACE_WITH_KV_NAMESPACE_ID"
+
+[vars]
+OPENAI_MODEL = "gpt-4o-mini"
+ALLOWED_ORIGINS = "https://pyramidgolds.in,https://www.pyramidgolds.in"
+WA_OWNER_NUMBER = "60148927013"
+WA_TEMPLATE = "owner_floor_check"
+WA_TEMPLATE_LANG = "en"
+SHEET_TAB = "Leads"
+# Store hours in India time (24h). The owner is only pinged inside these hours.
+OPEN_HOUR = "10"
+CLOSE_HOUR = "20"
+PING_TIMEOUT_SEC = "180"
+
+# Secrets (set with `npx wrangler secret put NAME`, never commit them):
+#   OPENAI_API_KEY, WA_TOKEN, WA_PHONE_NUMBER_ID, WA_VERIFY_TOKEN, WA_APP_SECRET,
+#   GOOGLE_SA_EMAIL, GOOGLE_SA_KEY, SHEET_ID
