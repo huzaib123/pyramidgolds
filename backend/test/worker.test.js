@@ -1,13 +1,10 @@
 // Run with: cd backend && node --test
-// Exercises the Worker end to end with fake OpenAI, WhatsApp, Google and KV.
+// Exercises the Worker end to end with fake OpenAI, WhatsApp, Apps Script and KV.
 import { test, beforeEach } from 'node:test';
 import assert from 'node:assert/strict';
-import { generateKeyPairSync, createHmac } from 'node:crypto';
+import { createHmac } from 'node:crypto';
 import worker, { guardReply, ownerReply, storeOpen } from '../src/worker.js';
 import { OWNER_ANSWERS } from '../src/prompt.js';
-
-const { privateKey } = generateKeyPairSync('rsa', { modulusLength: 2048 });
-const PEM = privateKey.export({ type: 'pkcs8', format: 'pem' });
 
 function kv() {
   const m = new Map();
@@ -20,8 +17,8 @@ beforeEach(() => {
   openaiQueue = [];
   env = {
     STATE: kv(), OPENAI_API_KEY: 'sk-test', WA_TOKEN: 'wa', WA_PHONE_NUMBER_ID: '123', WA_OWNER_NUMBER: '60148927013',
-    WA_VERIFY_TOKEN: 'verify', WA_APP_SECRET: 'secret', GOOGLE_SA_EMAIL: 'bot@x.iam.gserviceaccount.com',
-    GOOGLE_SA_KEY: PEM, SHEET_ID: 'sheet1', OPEN_HOUR: '0', CLOSE_HOUR: '24',
+    WA_VERIFY_TOKEN: 'verify', WA_APP_SECRET: 'secret', 
+    SHEET_WEBHOOK_URL: 'https://script.google.com/macros/s/abc/exec', SHEET_WEBHOOK_SECRET: 'shh', OPEN_HOUR: '0', CLOSE_HOUR: '24',
   };
   globalThis.fetch = async (url, init = {}) => {
     calls.push({ url: String(url), init });
@@ -29,8 +26,7 @@ beforeEach(() => {
       const next = openaiQueue.shift();
       return Response.json({ choices: [{ message: next }] });
     }
-    if (String(url).includes('oauth2.googleapis.com')) return Response.json({ access_token: 'gtoken' });
-    if (String(url).includes('sheets.googleapis.com')) return Response.json({});
+    if (String(url).includes('script.google.com')) return Response.json({ ok: true });
     if (String(url).includes('graph.facebook.com')) return Response.json({ messages: [{ id: 'wamid.ABC' }] });
     throw new Error('unexpected fetch ' + url);
   };
@@ -57,14 +53,15 @@ test('a price that slips through is replaced', async () => {
   assert.match(guardReply('About Rs 72000 for 10 g'), /locked-in/);
 });
 
-test('lead is appended to the sheet as raw text', async () => {
+test('lead is sent to the sheet script with the secret', async () => {
   openaiQueue.push(toolCall('log_lead', { name: 'Aamir', contact: '+91 98765 43210', inquiry: '50g bar - price' }));
   openaiQueue.push({ content: 'I have securely forwarded your request to our team.' });
   const r = await chat([{ role: 'user', content: 'Aamir, +91 98765 43210' }]);
   assert.match(r.reply, /securely forwarded/);
-  const sheet = calls.find(c => c.url.includes('sheets.googleapis.com'));
-  assert.match(sheet.url, /valueInputOption=RAW/);
-  const row = JSON.parse(sheet.init.body).values[0];
+  const sheet = calls.find(c => c.url.includes('script.google.com'));
+  const body = JSON.parse(sheet.init.body);
+  assert.equal(body.secret, 'shh');
+  const row = body.row;
   assert.deepEqual(row.slice(1), ['Aamir', '+91 98765 43210', '50g bar - price', 'Pending']);
 });
 
@@ -72,7 +69,7 @@ test('invalid contact is not logged', async () => {
   openaiQueue.push(toolCall('log_lead', { contact: 'call me', inquiry: 'x' }));
   openaiQueue.push({ content: 'Could you re-check your number?' });
   await chat([{ role: 'user', content: 'call me' }]);
-  assert.ok(!calls.some(c => c.url.includes('sheets.googleapis.com')));
+  assert.ok(!calls.some(c => c.url.includes('script.google.com')));
 });
 
 test('owner ping: template sent, button reply reaches the customer', async () => {
