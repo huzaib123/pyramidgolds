@@ -1,0 +1,101 @@
+# Deploys the chat backend (backend/) to Cloudflare Workers and switches on the site widget.
+# Runs on every push to main that touches backend/, or by hand from the Actions tab.
+# Needs the repository secrets listed in backend/README.md; until CLOUDFLARE_API_TOKEN is set it skips the deploy.
+name: Deploy chat backend
+
+on:
+  push:
+    branches: [main]
+    paths: ['backend/**', '.github/workflows/deploy-chat.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: deploy-chat
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Run backend tests
+        working-directory: backend
+        run: node --test
+
+      - name: Check Cloudflare secrets
+        id: gate
+        run: |
+          if [ -z "$CLOUDFLARE_API_TOKEN" ] || [ -z "$CLOUDFLARE_ACCOUNT_ID" ]; then
+            echo "::notice::CLOUDFLARE_API_TOKEN / CLOUDFLARE_ACCOUNT_ID not set yet; skipping deploy."
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Find or create the KV namespace
+        if: steps.gate.outputs.ready == 'true'
+        run: |
+          set -euo pipefail
+          api="https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/storage/kv/namespaces"
+          auth="Authorization: Bearer $CLOUDFLARE_API_TOKEN"
+          title="pyramidgolds-chat-state"
+          id=$(curl -fsS -H "$auth" "$api?per_page=100" | jq -r --arg t "$title" '.result[] | select(.title==$t) | .id' | head -n1)
+          if [ -z "$id" ]; then
+            id=$(curl -fsS -X POST -H "$auth" -H "Content-Type: application/json" -d "{\"title\":\"$title\"}" "$api" | jq -r '.result.id')
+          fi
+          sed -i "s/REPLACE_WITH_KV_NAMESPACE_ID/$id/" backend/wrangler.toml
+          echo "KV namespace: $id"
+
+      - name: Deploy Worker and upload secrets
+        if: steps.gate.outputs.ready == 'true'
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: backend
+          secrets: |
+            OPENAI_API_KEY
+            WA_TOKEN
+            WA_PHONE_NUMBER_ID
+            WA_VERIFY_TOKEN
+            WA_APP_SECRET
+            GOOGLE_SA_EMAIL
+            GOOGLE_SA_KEY
+            SHEET_ID
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          WA_TOKEN: ${{ secrets.WA_TOKEN }}
+          WA_PHONE_NUMBER_ID: ${{ secrets.WA_PHONE_NUMBER_ID }}
+          WA_VERIFY_TOKEN: ${{ secrets.WA_VERIFY_TOKEN }}
+          WA_APP_SECRET: ${{ secrets.WA_APP_SECRET }}
+          GOOGLE_SA_EMAIL: ${{ secrets.GOOGLE_SA_EMAIL }}
+          GOOGLE_SA_KEY: ${{ secrets.GOOGLE_SA_KEY }}
+          SHEET_ID: ${{ secrets.SHEET_ID }}
+
+      - name: Point the site widget at the Worker
+        if: steps.gate.outputs.ready == 'true'
+        run: |
+          set -euo pipefail
+          sub=$(curl -fsS -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
+            "https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/workers/subdomain" | jq -r '.result.subdomain')
+          url="https://pyramidgolds-chat.$sub.workers.dev"
+          echo "Worker URL: $url"
+          echo "WhatsApp webhook callback URL: $url/whatsapp/webhook" >> "$GITHUB_STEP_SUMMARY"
+          git checkout -- backend/wrangler.toml
+          sed -i -E "s#(<script src=\"chat.js\" data-api=\")[^\"]*(\")#\1$url\2#" index.html
+          if git diff --quiet index.html; then exit 0; fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -am "Switch on chat widget ($url)"
+          git push

@@ -1,0 +1,132 @@
+// Run with: cd backend && node --test
+// Exercises the Worker end to end with fake OpenAI, WhatsApp, Google and KV.
+import { test, beforeEach } from 'node:test';
+import assert from 'node:assert/strict';
+import { generateKeyPairSync, createHmac } from 'node:crypto';
+import worker, { guardReply, ownerReply, storeOpen } from '../src/worker.js';
+import { OWNER_ANSWERS } from '../src/prompt.js';
+
+const { privateKey } = generateKeyPairSync('rsa', { modulusLength: 2048 });
+const PEM = privateKey.export({ type: 'pkcs8', format: 'pem' });
+
+function kv() {
+  const m = new Map();
+  return { m, get: async k => (m.has(k) ? m.get(k) : null), put: async (k, v) => { m.set(k, v); } };
+}
+
+let env, calls, openaiQueue;
+beforeEach(() => {
+  calls = [];
+  openaiQueue = [];
+  env = {
+    STATE: kv(), OPENAI_API_KEY: 'sk-test', WA_TOKEN: 'wa', WA_PHONE_NUMBER_ID: '123', WA_OWNER_NUMBER: '60148927013',
+    WA_VERIFY_TOKEN: 'verify', WA_APP_SECRET: 'secret', GOOGLE_SA_EMAIL: 'bot@x.iam.gserviceaccount.com',
+    GOOGLE_SA_KEY: PEM, SHEET_ID: 'sheet1', OPEN_HOUR: '0', CLOSE_HOUR: '24',
+  };
+  globalThis.fetch = async (url, init = {}) => {
+    calls.push({ url: String(url), init });
+    if (String(url).includes('api.openai.com')) {
+      const next = openaiQueue.shift();
+      return Response.json({ choices: [{ message: next }] });
+    }
+    if (String(url).includes('oauth2.googleapis.com')) return Response.json({ access_token: 'gtoken' });
+    if (String(url).includes('sheets.googleapis.com')) return Response.json({});
+    if (String(url).includes('graph.facebook.com')) return Response.json({ messages: [{ id: 'wamid.ABC' }] });
+    throw new Error('unexpected fetch ' + url);
+  };
+});
+
+const chat = (messages, sessionId = 'session-1234') =>
+  worker.fetch(new Request('https://w.dev/chat', { method: 'POST', headers: { 'CF-Connecting-IP': '1.2.3.4' }, body: JSON.stringify({ sessionId, messages }) }), env).then(r => r.json());
+const toolCall = (name, args) => ({ content: null, tool_calls: [{ id: 'c1', type: 'function', function: { name, arguments: JSON.stringify(args) } }] });
+
+test('plain answer passes through', async () => {
+  openaiQueue.push({ content: 'Yes, 10g is currently available in stock in 24K 999.9 certified purity.' });
+  const r = await chat([{ role: 'user', content: 'Do you have 10g?' }]);
+  assert.match(r.reply, /available in stock/);
+  const sent = JSON.parse(calls[0].init.body);
+  assert.equal(sent.messages[0].role, 'system');
+  assert.deepEqual(sent.tools.map(t => t.function.name), ['log_lead', 'notify_owner']);
+});
+
+test('a price that slips through is replaced', async () => {
+  openaiQueue.push({ content: 'Today it is ₹7,200 per gram.' });
+  const r = await chat([{ role: 'user', content: 'rate?' }]);
+  assert.match(r.reply, /locked-in quotes/);
+  assert.equal(guardReply('We buy back 50 g bars.'), 'We buy back 50 g bars.');
+  assert.match(guardReply('About Rs 72000 for 10 g'), /locked-in/);
+});
+
+test('lead is appended to the sheet as raw text', async () => {
+  openaiQueue.push(toolCall('log_lead', { name: 'Aamir', contact: '+91 98765 43210', inquiry: '50g bar - price' }));
+  openaiQueue.push({ content: 'I have securely forwarded your request to our team.' });
+  const r = await chat([{ role: 'user', content: 'Aamir, +91 98765 43210' }]);
+  assert.match(r.reply, /securely forwarded/);
+  const sheet = calls.find(c => c.url.includes('sheets.googleapis.com'));
+  assert.match(sheet.url, /valueInputOption=RAW/);
+  const row = JSON.parse(sheet.init.body).values[0];
+  assert.deepEqual(row.slice(1), ['Aamir', '+91 98765 43210', '50g bar - price', 'Pending']);
+});
+
+test('invalid contact is not logged', async () => {
+  openaiQueue.push(toolCall('log_lead', { contact: 'call me', inquiry: 'x' }));
+  openaiQueue.push({ content: 'Could you re-check your number?' });
+  await chat([{ role: 'user', content: 'call me' }]);
+  assert.ok(!calls.some(c => c.url.includes('sheets.googleapis.com')));
+});
+
+test('owner ping: template sent, button reply reaches the customer', async () => {
+  openaiQueue.push(toolCall('notify_owner', { summary: 'Wants to visit now' }));
+  openaiQueue.push({ content: 'One moment.' });
+  const r = await chat([{ role: 'user', content: 'Is the owner there?' }]);
+  assert.equal(r.reply, 'Please give me a brief moment while I check the floor for you...');
+  assert.ok(r.pingId);
+  const wa = JSON.parse(calls.find(c => c.url.includes('graph.facebook.com')).init.body);
+  assert.equal(wa.to, '60148927013');
+  assert.equal(wa.type, 'template');
+
+  let poll = await worker.fetch(new Request(`https://w.dev/ping/${r.pingId}`), env).then(x => x.json());
+  assert.equal(poll.status, 'pending');
+
+  const hook = JSON.stringify({ entry: [{ changes: [{ value: { messages: [{ from: '60148927013', type: 'button', context: { id: 'wamid.ABC' }, button: { text: 'Here now', payload: 'Here now' } }] } }] }] });
+  const sig = 'sha256=' + createHmac('sha256', 'secret').update(hook).digest('hex');
+  const res = await worker.fetch(new Request('https://w.dev/whatsapp/webhook', { method: 'POST', headers: { 'X-Hub-Signature-256': sig }, body: hook }), env);
+  assert.equal(res.status, 200);
+  poll = await worker.fetch(new Request(`https://w.dev/ping/${r.pingId}`), env).then(x => x.json());
+  assert.deepEqual(poll, { status: 'answered', reply: OWNER_ANSWERS.here });
+});
+
+test('webhook rejects bad signatures and strangers', async () => {
+  const hook = JSON.stringify({ entry: [] });
+  const res = await worker.fetch(new Request('https://w.dev/whatsapp/webhook', { method: 'POST', headers: { 'X-Hub-Signature-256': 'sha256=00' }, body: hook }), env);
+  assert.equal(res.status, 401);
+  assert.equal(ownerReply({ text: { body: 'Back at 6' } }), 'Message from the owner: "Back at 6"');
+});
+
+test('second ping in the same chat is refused', async () => {
+  for (let i = 0; i < 2; i++) {
+    openaiQueue.push(toolCall('notify_owner', { summary: 'visit' }));
+    openaiQueue.push({ content: 'Our team can contact you instead.' });
+  }
+  await chat([{ role: 'user', content: 'Is the owner there?' }]);
+  const second = await chat([{ role: 'user', content: 'Is the owner there now?' }]);
+  assert.equal(second.pingId, undefined);
+  assert.equal(calls.filter(c => c.url.includes('graph.facebook.com')).length, 1);
+});
+
+test('ping times out after the configured wait', async () => {
+  env.STATE.m.set('ping:abcdef12', JSON.stringify({ status: 'pending', created: Date.now() - 181000 }));
+  const poll = await worker.fetch(new Request('https://w.dev/ping/abcdef12'), env).then(x => x.json());
+  assert.equal(poll.status, 'timeout');
+});
+
+test('store hours are India time', () => {
+  const e = { OPEN_HOUR: '10', CLOSE_HOUR: '20' };
+  assert.equal(storeOpen(e, new Date('2026-10-04T05:00:00Z')), true);  // 10:30 IST
+  assert.equal(storeOpen(e, new Date('2026-10-04T15:00:00Z')), false); // 20:30 IST
+});
+
+test('webhook verification handshake', async () => {
+  const ok = await worker.fetch(new Request('https://w.dev/whatsapp/webhook?hub.mode=subscribe&hub.verify_token=verify&hub.challenge=42'), env);
+  assert.equal(await ok.text(), '42');
+});
