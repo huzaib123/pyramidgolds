@@ -3,7 +3,9 @@
 //   GET  /ping/:id          poll an owner ping: pending | answered | timeout
 //   GET  /whatsapp/webhook  Meta webhook verification
 //   POST /whatsapp/webhook  owner's WhatsApp replies
-// State (pings, rate limits) lives in the STATE KV namespace.
+// Rate limits live in the STATE KV namespace. Owner pings live in the Pings Durable Object, which is
+// strongly consistent: KV can take up to a minute to show a write made in another data centre, and Meta's
+// webhook call usually lands in a different one from the customer's browser.
 
 import { SYSTEM_PROMPT, TOOLS, OWNER_ANSWERS } from './prompt.js';
 
@@ -181,16 +183,17 @@ async function notifyOwner(env, { ip, sessionId, summary = '' }) {
   }
   const wamid = (await res.json()).messages?.[0]?.id;
   const ttl = 3600;
-  await env.STATE.put(`ping:${pingId}`, JSON.stringify({ status: 'pending', created: Date.now() }), { expirationTtl: ttl });
-  if (wamid) await env.STATE.put(`wamid:${wamid}`, pingId, { expirationTtl: ttl });
-  await env.STATE.put('ping:latest', pingId, { expirationTtl: ttl });
+  const pings = pingStore(env);
+  await pings.put(`ping:${pingId}`, JSON.stringify({ status: 'pending', created: Date.now() }), ttl);
+  if (wamid) await pings.put(`wamid:${wamid}`, pingId, ttl);
+  await pings.put('ping:latest', pingId, ttl);
   await env.STATE.put(`pingsess:${sessionId}`, pingId, { expirationTtl: 86400 });
   return { ok: true, pingId };
 }
 
 async function handlePoll(id, env) {
   const pingId = cleanId(id);
-  const raw = pingId && await env.STATE.get(`ping:${pingId}`);
+  const raw = pingId && await pingStore(env).get(`ping:${pingId}`);
   if (!raw) return { status: 'timeout', reply: OWNER_ANSWERS.timeout };
   const ping = JSON.parse(raw);
   if (ping.status === 'answered') return { status: 'answered', reply: ping.reply };
@@ -206,21 +209,22 @@ function verifyWebhook(url, env) {
 async function handleWebhook(request, env) {
   const raw = await request.text();
   if (!(await validSignature(raw, request.headers.get('X-Hub-Signature-256'), env.WA_APP_SECRET))) {
+    console.warn('webhook rejected: bad signature (check WA_APP_SECRET)');
     return new Response('bad signature', { status: 401 });
   }
   const payload = JSON.parse(raw);
+  const pings = pingStore(env);
   const owner = String(env.WA_OWNER_NUMBER).replace(/\D/g, '');
   for (const entry of payload.entry || []) {
     for (const change of entry.changes || []) {
       for (const m of change.value?.messages || []) {
-        if (String(m.from).replace(/\D/g, '') !== owner) continue; // only the owner can answer pings
-        const pingId = (m.context?.id && await env.STATE.get(`wamid:${m.context.id}`)) || await env.STATE.get('ping:latest');
-        if (!pingId) continue;
+        if (String(m.from).replace(/\D/g, '') !== owner) { console.log('webhook message from a non-owner number ignored'); continue; } // only the owner can answer pings
+        const pingId = (m.context?.id && await pings.get(`wamid:${m.context.id}`)) || await pings.get('ping:latest');
         const reply = ownerReply(m);
-        if (!reply) continue;
-        const prev = JSON.parse(await env.STATE.get(`ping:${pingId}`) || 'null');
-        if (!prev || prev.status === 'answered') continue;
-        await env.STATE.put(`ping:${pingId}`, JSON.stringify({ ...prev, status: 'answered', reply }), { expirationTtl: 3600 });
+        const prev = pingId && JSON.parse(await pings.get(`ping:${pingId}`) || 'null');
+        console.log('owner reply', { type: m.type, hasContext: !!m.context?.id, pingId, status: prev?.status ?? null, understood: !!reply });
+        if (!reply || !prev || prev.status === 'answered') continue;
+        await pings.put(`ping:${pingId}`, JSON.stringify({ ...prev, status: 'answered', reply }), 3600);
       }
     }
   }
@@ -280,4 +284,40 @@ function corsHeaders(request, env) {
 
 function json(data, status, headers) {
   return new Response(JSON.stringify(data), { status, headers: { ...headers, 'Content-Type': 'application/json' } });
+}
+
+// ---------- ping store ----------
+
+// Ping state goes through one Durable Object so the webhook and the customer's poll always agree.
+// Tests (and a deploy without the PINGS binding) fall back to KV.
+function pingStore(env) {
+  if (!env.PINGS) {
+    return { get: k => env.STATE.get(k), put: (k, v, ttl) => env.STATE.put(k, v, { expirationTtl: ttl }) };
+  }
+  const stub = env.PINGS.get(env.PINGS.idFromName('pings'));
+  const call = body => stub.fetch('https://pings/', { method: 'POST', body: JSON.stringify(body) }).then(r => r.json());
+  return { get: async k => (await call({ op: 'get', key: k })).value, put: (k, v, ttl) => call({ op: 'put', key: k, value: v, ttl }) };
+}
+
+export class Pings {
+  constructor(state) { this.storage = state.storage; }
+
+  async fetch(request) {
+    const { op, key, value, ttl } = await request.json();
+    const now = Date.now();
+    if (op === 'put') {
+      await this.storage.put(key, { value, exp: now + (ttl || 3600) * 1000 });
+      if (Math.random() < 0.05) await this.prune(now);
+      return Response.json({ ok: true });
+    }
+    const item = await this.storage.get(key);
+    if (item && item.exp < now) { await this.storage.delete(key); return Response.json({ value: null }); }
+    return Response.json({ value: item?.value ?? null });
+  }
+
+  async prune(now) {
+    const all = await this.storage.list();
+    const old = [...all].filter(([, v]) => v.exp < now).map(([k]) => k);
+    if (old.length) await this.storage.delete(old);
+  }
 }

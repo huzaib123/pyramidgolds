@@ -7,12 +7,26 @@ compatibility_date = "2026-09-01"
 binding = "STATE"
 id = "REPLACE_WITH_KV_NAMESPACE_ID"
 
+# Owner pings: strongly consistent store shared by the webhook and the customer's poll.
+[[durable_objects.bindings]]
+name = "PINGS"
+class_name = "Pings"
+
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["Pings"]
+
+# Keeps Worker logs in the Cloudflare dashboard (Workers & Pages -> pyramidgolds-chat -> Logs).
+[observability]
+enabled = true
+
 [vars]
 OPENAI_MODEL = "gpt-4o-mini"
 ALLOWED_ORIGINS = "https://pyramidgolds.in,https://www.pyramidgolds.in"
 WA_OWNER_NUMBER = "60148927013"
-WA_TEMPLATE = "owner_floor_check"
-WA_TEMPLATE_LANG = "en"
+# Meta's sample template until owner_floor_check is approved; then switch to owner_floor_check / en.
+WA_TEMPLATE = "hello_world"
+WA_TEMPLATE_LANG = "en_US"
 # Store hours in India time (24h). The owner is only pinged inside these hours.
 OPEN_HOUR = "10"
 CLOSE_HOUR = "21"

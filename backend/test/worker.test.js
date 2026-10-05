@@ -3,7 +3,7 @@
 import { test, beforeEach } from 'node:test';
 import assert from 'node:assert/strict';
 import { createHmac } from 'node:crypto';
-import worker, { guardReply, ownerReply, storeOpen } from '../src/worker.js';
+import worker, { guardReply, ownerReply, storeOpen, Pings } from '../src/worker.js';
 import { OWNER_ANSWERS } from '../src/prompt.js';
 
 function kv() {
@@ -145,4 +145,15 @@ test('store hours are India time', () => {
 test('webhook verification handshake', async () => {
   const ok = await worker.fetch(new Request('https://w.dev/whatsapp/webhook?hub.mode=subscribe&hub.verify_token=verify&hub.challenge=42'), env);
   assert.equal(await ok.text(), '42');
+});
+
+test('Pings store keeps values until they expire', async () => {
+  const m = new Map();
+  const storage = { get: async k => m.get(k), put: async (k, v) => { m.set(k, v); }, delete: async k => { [].concat(k).forEach(x => m.delete(x)); }, list: async () => m };
+  const store = new Pings({ storage });
+  const call = body => store.fetch(new Request('https://pings/', { method: 'POST', body: JSON.stringify(body) })).then(r => r.json());
+  await call({ op: 'put', key: 'ping:a', value: 'x', ttl: 60 });
+  assert.equal((await call({ op: 'get', key: 'ping:a' })).value, 'x');
+  m.set('ping:b', { value: 'y', exp: Date.now() - 1 });
+  assert.equal((await call({ op: 'get', key: 'ping:b' })).value, null);
 });
