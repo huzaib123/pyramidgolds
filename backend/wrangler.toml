@@ -24,6 +24,7 @@ enabled = true
 OPENAI_MODEL = "gpt-4o-mini"
 ALLOWED_ORIGINS = "https://pyramidgolds.in,https://www.pyramidgolds.in"
 WA_OWNER_NUMBER = "60148927013"
+# Meta's sample template until owner_floor_check is approved; then switch to owner_floor_check / en.
 WA_TEMPLATE = "hello_world"
 WA_TEMPLATE_LANG = "en_US"
 # Store hours in India time (24h). The owner is only pinged inside these hours.
