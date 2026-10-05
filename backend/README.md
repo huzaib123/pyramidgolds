@@ -3,7 +3,8 @@
 A Cloudflare Worker behind the chat widget (`chat.js`) on pyramidgolds.in. It does three things:
 
 1. **Chat**: answers customers with OpenAI (`gpt-4o-mini` by default) using the prompt in `src/prompt.js`.
-2. **Leads**: the `log_lead` tool appends `Time | Name | Contact | Inquiry | Pending` to a Google Sheet.
+2. **Leads**: the `log_lead` tool appends `Time | Name | Contact | Inquiry | Pending` to a Google Sheet through
+   a small Apps Script on the sheet (`apps-script.gs`).
 3. **Owner ping**: the `notify_owner` tool sends the owner a WhatsApp template with three buttons
    (Here now / Back later / Busy). The widget polls `/ping/:id`; the owner's reply comes back through the
    WhatsApp webhook. After `PING_TIMEOUT_SEC` (180 s) with no answer, the customer is asked for their number.
@@ -16,11 +17,18 @@ The site stays on GitHub Pages. `_config.yml` keeps this folder off the public s
 ### 1. OpenAI
 Create an API key at platform.openai.com → API keys. Add a small monthly budget limit under Billing → Limits.
 
-### 2. Google Sheet
-1. Create a Google Sheet with a tab named `Leads` and headers `Time | Name | Contact | Inquiry | Status` in row 1.
-2. In Google Cloud Console: create a project, enable the **Google Sheets API**, create a **service account**, and add a JSON key.
-3. Share the sheet with the service account's email (Editor). Don't share it with anyone else except the owner.
-4. Note the sheet ID (the long part of the sheet URL between `/d/` and `/edit`).
+### 2. Google Sheet (free, no Google Cloud account needed)
+1. Create a Google Sheet (the existing **Leads** sheet is fine). Leads go into a tab named `Leads`; the script adds
+   the header row by itself.
+2. Make up a long random password for the sheet, e.g. 30+ letters and numbers. This is `SHEET_WEBHOOK_SECRET`.
+3. In the sheet: **Extensions → Apps Script**. Delete what's there, paste the contents of `backend/apps-script.gs`,
+   and put your password in the `SECRET` line. Save.
+4. **Deploy → New deployment →** gear icon **→ Web app**. Execute as: **Me**. Who has access: **Anyone**. Deploy,
+   and allow the permissions Google asks for (Advanced → Go to project, if it warns you).
+5. Copy the **Web app URL** (ends in `/exec`). This is `SHEET_WEBHOOK_URL`.
+
+The URL alone can't write anything: every request must carry the password, and only the sheet's owner can see the
+data. If you edit the script later, use **Deploy → Manage deployments → Edit → New version** so the URL stays the same.
 
 ### 3. WhatsApp (Meta Cloud API)
 The business number +91 80825 56365 is already the shop's WhatsApp. To keep using it in the WhatsApp Business app
@@ -53,10 +61,9 @@ In the repo: **Settings → Secrets and variables → Actions → New repository
 | --- | --- |
 | `CLOUDFLARE_API_TOKEN` | Step 4.3 |
 | `CLOUDFLARE_ACCOUNT_ID` | Step 4.2 |
-| `OPENAI_API_KEY` | Step 1 |
-| `GOOGLE_SA_EMAIL` | `client_email` in the service account JSON key |
-| `GOOGLE_SA_KEY` | `private_key` in the JSON key, pasted whole including the BEGIN/END lines |
-| `SHEET_ID` | Step 2.4 |
+| `API_KEY_OPEN_AI` | Step 1 (the OpenAI key) |
+| `SHEET_WEBHOOK_URL` | Step 2.5 |
+| `SHEET_WEBHOOK_SECRET` | Step 2.2 |
 | `WA_TOKEN` | Step 3.2 (permanent system-user token) |
 | `WA_PHONE_NUMBER_ID` | Step 3.1 |
 | `WA_APP_SECRET` | Step 3.5 |
@@ -84,4 +91,4 @@ button stays hidden.
 ```bash
 cd backend && node --test
 ```
-They run the Worker against fake OpenAI, WhatsApp, Google and KV services.
+They run the Worker against fake OpenAI, WhatsApp, Apps Script and KV services.

@@ -3,7 +3,7 @@
 //   GET  /ping/:id          poll an owner ping: pending | answered | timeout
 //   GET  /whatsapp/webhook  Meta webhook verification
 //   POST /whatsapp/webhook  owner's WhatsApp replies
-// State (pings, rate limits, Google token cache) lives in the STATE KV namespace.
+// State (pings, rate limits) lives in the STATE KV namespace.
 
 import { SYSTEM_PROMPT, TOOLS, OWNER_ANSWERS } from './prompt.js';
 
@@ -107,7 +107,7 @@ export function guardReply(text) {
   return text.trim() || FALLBACK_REPLY;
 }
 
-// ---------- leads -> Google Sheet ----------
+// ---------- leads -> Google Sheet (via Apps Script) ----------
 
 const PHONE = /^\+?[\d\s()-]{7,20}$/;
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -125,45 +125,19 @@ export async function logLead(env, { name = '', contact = '', inquiry = '' }) {
     String(inquiry).trim().slice(0, 200),
     'Pending',
   ];
-  const token = await googleToken(env);
-  const range = encodeURIComponent(`${env.SHEET_TAB || 'Leads'}!A:E`);
-  // RAW keeps every cell as plain text, so a value like "=HYPERLINK(...)" is never run as a formula.
-  const res = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${env.SHEET_ID}/values/${range}:append?valueInputOption=RAW&insertDataOption=INSERT_ROWS`, {
+  // The sheet's own Apps Script (backend/apps-script.gs) appends the row; it needs no Google Cloud project.
+  const res = await fetch(env.SHEET_WEBHOOK_URL, {
     method: 'POST',
-    headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ values: [row] }),
+    headers: { 'Content-Type': 'text/plain' },
+    body: JSON.stringify({ secret: env.SHEET_WEBHOOK_SECRET, row }),
+    redirect: 'follow',
   });
-  if (!res.ok) {
-    console.error('Sheets append failed', res.status, await res.text());
+  const out = res.ok ? await res.json().catch(() => null) : null;
+  if (!out?.ok) {
+    console.error('Sheet append failed', res.status, out);
     return { ok: false, error: 'Could not forward right now. Ask the customer to also message +91 80825 56365 on WhatsApp.' };
   }
   return { ok: true };
-}
-
-async function googleToken(env) {
-  const cached = await env.STATE.get('google:token');
-  if (cached) return cached;
-  const now = Math.floor(Date.now() / 1000);
-  const enc = obj => b64url(new TextEncoder().encode(JSON.stringify(obj)));
-  const unsigned = `${enc({ alg: 'RS256', typ: 'JWT' })}.${enc({
-    iss: env.GOOGLE_SA_EMAIL,
-    scope: 'https://www.googleapis.com/auth/spreadsheets',
-    aud: 'https://oauth2.googleapis.com/token',
-    iat: now,
-    exp: now + 3600,
-  })}`;
-  const pem = env.GOOGLE_SA_KEY.replace(/\\n/g, '\n').replace(/-----[^-]+-----/g, '').replace(/\s/g, '');
-  const key = await crypto.subtle.importKey('pkcs8', Uint8Array.from(atob(pem), c => c.charCodeAt(0)), { name: 'RSASSA-PKCS1-v1_5', hash: 'SHA-256' }, false, ['sign']);
-  const sig = await crypto.subtle.sign('RSASSA-PKCS1-v1_5', key, new TextEncoder().encode(unsigned));
-  const res = await fetch('https://oauth2.googleapis.com/token', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body: new URLSearchParams({ grant_type: 'urn:ietf:params:oauth:grant-type:jwt-bearer', assertion: `${unsigned}.${b64url(new Uint8Array(sig))}` }),
-  });
-  if (!res.ok) throw new Error(`Google token ${res.status}: ${await res.text()}`);
-  const { access_token } = await res.json();
-  await env.STATE.put('google:token', access_token, { expirationTtl: 3000 });
-  return access_token;
 }
 
 // ---------- owner ping -> WhatsApp ----------
@@ -187,20 +161,20 @@ async function notifyOwner(env, { ip, sessionId, summary = '' }) {
   }
 
   const pingId = crypto.randomUUID();
-  const res = await fetch(`https://graph.facebook.com/v21.0/${env.WA_PHONE_NUMBER_ID}/messages`, {
+  const text = (String(summary).replace(/\s+/g, ' ').trim() || 'A website visitor wants to visit now').slice(0, 200);
+  const send = components => fetch(`https://graph.facebook.com/v21.0/${env.WA_PHONE_NUMBER_ID}/messages`, {
     method: 'POST',
     headers: { Authorization: `Bearer ${env.WA_TOKEN}`, 'Content-Type': 'application/json' },
     body: JSON.stringify({
       messaging_product: 'whatsapp',
       to: env.WA_OWNER_NUMBER,
       type: 'template',
-      template: {
-        name: env.WA_TEMPLATE || 'owner_floor_check',
-        language: { code: env.WA_TEMPLATE_LANG || 'en' },
-        components: [{ type: 'body', parameters: [{ type: 'text', text: (String(summary).replace(/\s+/g, ' ').trim() || 'A website visitor wants to visit now').slice(0, 200) }] }],
-      },
+      template: { name: env.WA_TEMPLATE || 'owner_floor_check', language: { code: env.WA_TEMPLATE_LANG || 'en' }, components },
     }),
   });
+  let res = await send([{ type: 'body', parameters: [{ type: 'text', text }] }]);
+  // A template body without {{1}} rejects the parameter; send it plain rather than miss the ping.
+  if (res.status === 400) res = await send([]);
   if (!res.ok) {
     console.error('WhatsApp send failed', res.status, await res.text());
     return { ok: false, error: 'The owner cannot be reached right now. Offer to have the team contact the customer.' };
@@ -257,9 +231,10 @@ async function handleWebhook(request, env) {
 export function ownerReply(m) {
   const pressed = (m.button?.payload || m.button?.text || m.interactive?.button_reply?.title || '').toLowerCase();
   if (pressed) {
-    if (pressed.includes('here')) return OWNER_ANSWERS.here;
-    if (pressed.includes('later')) return OWNER_ANSWERS.later;
+    // Buttons may be in English or Kashmiri ("Aa vanas peth hez chus" / "Oour hez chus" / "Busy hez chus").
     if (pressed.includes('busy')) return OWNER_ANSWERS.busy;
+    if (pressed.includes('here') || pressed.includes('vanas')) return OWNER_ANSWERS.here;
+    if (pressed.includes('later') || pressed.includes('oour')) return OWNER_ANSWERS.later;
   }
   const text = m.text?.body?.trim();
   if (text) return `Message from the owner: "${text.slice(0, 500)}"`;
@@ -305,10 +280,4 @@ function corsHeaders(request, env) {
 
 function json(data, status, headers) {
   return new Response(JSON.stringify(data), { status, headers: { ...headers, 'Content-Type': 'application/json' } });
-}
-
-function b64url(bytes) {
-  let s = '';
-  for (const b of bytes) s += String.fromCharCode(b);
-  return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
 }
