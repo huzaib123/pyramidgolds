@@ -46,7 +46,7 @@ have to leave the app.
    verify token = the `WA_VERIFY_TOKEN` you choose, subscribe to the **messages** field.
 5. Note the **App secret** (App settings → Basic). It is used to check that webhook calls really come from Meta.
 
-The owner's number (+60 14-892 7013) receives the pings. It is set in `wrangler.toml` as `WA_OWNER_NUMBER`.
+The owner's personal WhatsApp receives the pings. It is the `OWNER_WHATSAPP` GitHub secret (digits only, with country code), kept out of the code because this repository is public.
 
 ### 4. Cloudflare
 1. Create a free Cloudflare account, open **Workers & Pages** once (this creates the `workers.dev` subdomain).
@@ -67,6 +67,7 @@ In the repo: **Settings → Secrets and variables → Actions → New repository
 | `WA_TOKEN` | Step 3.2 (permanent system-user token) |
 | `WA_PHONE_NUMBER_ID` | Step 3.1 |
 | `WA_APP_SECRET` | Step 3.5 |
+| `OWNER_WHATSAPP` | The owner's personal WhatsApp, digits only with country code (kept secret because the repo is public) |
 | `WA_VERIFY_TOKEN` | Any long random string you make up; type the same value in Meta's webhook setup |
 
 Then **Actions → Deploy chat backend → Run workflow**. It runs the tests, creates the KV store, deploys the
@@ -84,7 +85,6 @@ button stays hidden.
 | `OPENAI_MODEL` | `gpt-4o-mini` | OpenAI model |
 | `OPEN_HOUR` / `CLOSE_HOUR` | `10` / `21` | Store hours in India time; no owner pings outside them |
 | `PING_TIMEOUT_SEC` | `180` | How long the customer waits for the owner |
-| `WA_OWNER_NUMBER` | `60148927013` | Owner's WhatsApp, digits only |
 | `ALLOWED_ORIGINS` | pyramidgolds.in | Sites allowed to call the Worker |
 
 ## Tests

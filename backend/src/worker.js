@@ -152,6 +152,10 @@ export function storeOpen(env, now = new Date()) {
 }
 
 async function notifyOwner(env, { ip, sessionId, summary = '' }) {
+  if (!env.OWNER_WHATSAPP) {
+    console.error('OWNER_WHATSAPP secret is not set');
+    return { ok: false, error: 'The owner cannot be reached right now. Offer to have the team contact the customer.' };
+  }
   if (!storeOpen(env)) {
     return { ok: false, error: `The store is closed now (open ${env.OPEN_HOUR ?? 10}:00 to ${env.CLOSE_HOUR ?? 21}:00 IST). Offer to have the team contact the customer.` };
   }
@@ -169,7 +173,7 @@ async function notifyOwner(env, { ip, sessionId, summary = '' }) {
     headers: { Authorization: `Bearer ${env.WA_TOKEN}`, 'Content-Type': 'application/json' },
     body: JSON.stringify({
       messaging_product: 'whatsapp',
-      to: env.WA_OWNER_NUMBER,
+      to: env.OWNER_WHATSAPP,
       type: 'template',
       template: { name: env.WA_TEMPLATE || 'owner_floor_check', language: { code: env.WA_TEMPLATE_LANG || 'en' }, components },
     }),
@@ -214,7 +218,7 @@ async function handleWebhook(request, env) {
   }
   const payload = JSON.parse(raw);
   const pings = pingStore(env);
-  const owner = String(env.WA_OWNER_NUMBER).replace(/\D/g, '');
+  const owner = String(env.OWNER_WHATSAPP).replace(/\D/g, '');
   for (const entry of payload.entry || []) {
     for (const change of entry.changes || []) {
       for (const m of change.value?.messages || []) {
