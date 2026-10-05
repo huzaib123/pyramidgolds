@@ -98,6 +98,25 @@ test('webhook rejects bad signatures and strangers', async () => {
   const res = await worker.fetch(new Request('https://w.dev/whatsapp/webhook', { method: 'POST', headers: { 'X-Hub-Signature-256': 'sha256=00' }, body: hook }), env);
   assert.equal(res.status, 401);
   assert.equal(ownerReply({ text: { body: 'Back at 6' } }), 'Message from the owner: "Back at 6"');
+  assert.equal(ownerReply({ button: { text: 'Aa vanas peth hez chus' } }), OWNER_ANSWERS.here);
+  assert.equal(ownerReply({ button: { text: 'oour hez chus' } }), OWNER_ANSWERS.later);
+  assert.equal(ownerReply({ button: { text: 'Busy hez chus' } }), OWNER_ANSWERS.busy);
+});
+
+test('ping is resent without the visitor line if the template has no {{1}}', async () => {
+  const real = globalThis.fetch;
+  let waCalls = 0;
+  globalThis.fetch = async (url, init) => {
+    if (String(url).includes('graph.facebook.com') && ++waCalls === 1) { calls.push({ url: String(url), init }); return new Response('{}', { status: 400 }); }
+    return real(url, init);
+  };
+  openaiQueue.push(toolCall('notify_owner', { summary: 'visit' }));
+  openaiQueue.push({ content: 'One moment.' });
+  const r = await chat([{ role: 'user', content: 'Is the owner there?' }]);
+  assert.ok(r.pingId);
+  const sent = calls.filter(c => c.url.includes('graph.facebook.com')).map(c => JSON.parse(c.init.body).template.components);
+  assert.equal(sent.length, 2);
+  assert.deepEqual(sent[1], []);
 });
 
 test('second ping in the same chat is refused', async () => {

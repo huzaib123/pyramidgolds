@@ -161,20 +161,20 @@ async function notifyOwner(env, { ip, sessionId, summary = '' }) {
   }
 
   const pingId = crypto.randomUUID();
-  const res = await fetch(`https://graph.facebook.com/v21.0/${env.WA_PHONE_NUMBER_ID}/messages`, {
+  const text = (String(summary).replace(/\s+/g, ' ').trim() || 'A website visitor wants to visit now').slice(0, 200);
+  const send = components => fetch(`https://graph.facebook.com/v21.0/${env.WA_PHONE_NUMBER_ID}/messages`, {
     method: 'POST',
     headers: { Authorization: `Bearer ${env.WA_TOKEN}`, 'Content-Type': 'application/json' },
     body: JSON.stringify({
       messaging_product: 'whatsapp',
       to: env.WA_OWNER_NUMBER,
       type: 'template',
-      template: {
-        name: env.WA_TEMPLATE || 'owner_floor_check',
-        language: { code: env.WA_TEMPLATE_LANG || 'en' },
-        components: [{ type: 'body', parameters: [{ type: 'text', text: (String(summary).replace(/\s+/g, ' ').trim() || 'A website visitor wants to visit now').slice(0, 200) }] }],
-      },
+      template: { name: env.WA_TEMPLATE || 'owner_floor_check', language: { code: env.WA_TEMPLATE_LANG || 'en' }, components },
     }),
   });
+  let res = await send([{ type: 'body', parameters: [{ type: 'text', text }] }]);
+  // A template body without {{1}} rejects the parameter; send it plain rather than miss the ping.
+  if (res.status === 400) res = await send([]);
   if (!res.ok) {
     console.error('WhatsApp send failed', res.status, await res.text());
     return { ok: false, error: 'The owner cannot be reached right now. Offer to have the team contact the customer.' };
@@ -231,9 +231,10 @@ async function handleWebhook(request, env) {
 export function ownerReply(m) {
   const pressed = (m.button?.payload || m.button?.text || m.interactive?.button_reply?.title || '').toLowerCase();
   if (pressed) {
-    if (pressed.includes('here')) return OWNER_ANSWERS.here;
-    if (pressed.includes('later')) return OWNER_ANSWERS.later;
+    // Buttons may be in English or Kashmiri ("Aa vanas peth hez chus" / "Oour hez chus" / "Busy hez chus").
     if (pressed.includes('busy')) return OWNER_ANSWERS.busy;
+    if (pressed.includes('here') || pressed.includes('vanas')) return OWNER_ANSWERS.here;
+    if (pressed.includes('later') || pressed.includes('oour')) return OWNER_ANSWERS.later;
   }
   const text = m.text?.body?.trim();
   if (text) return `Message from the owner: "${text.slice(0, 500)}"`;
