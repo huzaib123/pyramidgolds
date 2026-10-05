@@ -16,7 +16,7 @@ beforeEach(() => {
   calls = [];
   openaiQueue = [];
   env = {
-    STATE: kv(), OPENAI_API_KEY: 'sk-test', WA_TOKEN: 'wa', WA_PHONE_NUMBER_ID: '123', WA_OWNER_NUMBER: '60148927013',
+    STATE: kv(), OPENAI_API_KEY: 'sk-test', WA_TOKEN: 'wa', WA_PHONE_NUMBER_ID: '123', OWNER_WHATSAPP: '15550001111',
     WA_VERIFY_TOKEN: 'verify', WA_APP_SECRET: 'secret', 
     SHEET_WEBHOOK_URL: 'https://script.google.com/macros/s/abc/exec', SHEET_WEBHOOK_SECRET: 'shh', OPEN_HOUR: '0', CLOSE_HOUR: '24',
   };
@@ -79,13 +79,13 @@ test('owner ping: template sent, button reply reaches the customer', async () =>
   assert.equal(r.reply, 'Please give me a brief moment while I check the floor for you...');
   assert.ok(r.pingId);
   const wa = JSON.parse(calls.find(c => c.url.includes('graph.facebook.com')).init.body);
-  assert.equal(wa.to, '60148927013');
+  assert.equal(wa.to, '15550001111');
   assert.equal(wa.type, 'template');
 
   let poll = await worker.fetch(new Request(`https://w.dev/ping/${r.pingId}`), env).then(x => x.json());
   assert.equal(poll.status, 'pending');
 
-  const hook = JSON.stringify({ entry: [{ changes: [{ value: { messages: [{ from: '60148927013', type: 'button', context: { id: 'wamid.ABC' }, button: { text: 'Here now', payload: 'Here now' } }] } }] }] });
+  const hook = JSON.stringify({ entry: [{ changes: [{ value: { messages: [{ from: '15550001111', type: 'button', context: { id: 'wamid.ABC' }, button: { text: 'Here now', payload: 'Here now' } }] } }] }] });
   const sig = 'sha256=' + createHmac('sha256', 'secret').update(hook).digest('hex');
   const res = await worker.fetch(new Request('https://w.dev/whatsapp/webhook', { method: 'POST', headers: { 'X-Hub-Signature-256': sig }, body: hook }), env);
   assert.equal(res.status, 200);

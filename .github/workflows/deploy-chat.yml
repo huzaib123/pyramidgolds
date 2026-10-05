@@ -70,6 +70,7 @@ jobs:
             WA_PHONE_NUMBER_ID
             WA_VERIFY_TOKEN
             WA_APP_SECRET
+            OWNER_WHATSAPP
             SHEET_WEBHOOK_URL
             SHEET_WEBHOOK_SECRET
         env:
@@ -78,6 +79,7 @@ jobs:
           WA_PHONE_NUMBER_ID: ${{ secrets.WA_PHONE_NUMBER_ID }}
           WA_VERIFY_TOKEN: ${{ secrets.WA_VERIFY_TOKEN }}
           WA_APP_SECRET: ${{ secrets.WA_APP_SECRET }}
+          OWNER_WHATSAPP: ${{ secrets.OWNER_WHATSAPP }}
           SHEET_WEBHOOK_URL: ${{ secrets.SHEET_WEBHOOK_URL }}
           SHEET_WEBHOOK_SECRET: ${{ secrets.SHEET_WEBHOOK_SECRET }}
 
