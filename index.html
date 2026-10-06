@@ -45,10 +45,20 @@
    "telephone": "+91-80825-56365",
    "address": {
     "@type": "PostalAddress",
+    "streetAddress": "Opposite Dr. Dobhi, Habak Crossing",
     "addressLocality": "Srinagar",
     "addressRegion": "Jammu and Kashmir",
+    "postalCode": "190006",
     "addressCountry": "IN"
    },
+   "openingHoursSpecification": [
+    {
+     "@type": "OpeningHoursSpecification",
+     "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
+     "opens": "10:00",
+     "closes": "20:30"
+    }
+   ],
    "areaServed": [
     {
      "@type": "City",
@@ -340,6 +350,8 @@ nav.scrolled{background:rgba(8,8,8,0.92);backdrop-filter:blur(24px);border-botto
 .clink::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,var(--gold-glow),transparent);opacity:0;transition:opacity .3s}
 .clink:hover{border-color:var(--gold);transform:translateX(6px)}
 .clink:hover::before{opacity:1}
+.clink-static:hover{border-color:var(--border);transform:none}
+.clink-static:hover::before{opacity:0}
 .clink-icon{width:42px;height:42px;flex-shrink:0;background:var(--gold-glow);border:1px solid var(--border);border-radius:0.6rem;display:flex;align-items:center;justify-content:center;font-size:17px}
 .clink-label{font-size:0.6rem;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:0.2rem}
 .clink-val{font-weight:700;font-size:0.92rem}
@@ -799,15 +811,19 @@ footer{padding:1.75rem 3rem;border-top:1px solid var(--divider);display:flex;jus
         </a>
         <a href="https://maps.app.goo.gl/72ELvt6b9xiNUhw47" target="_blank" rel="noopener" class="clink">
           <div class="clink-icon">&#128205;</div>
-          <div><div class="clink-label">Location</div><div class="clink-val">Srinagar, Kashmir</div></div>
+          <div><div class="clink-label">Location</div><div class="clink-val">Opposite Dr. Dobhi, Habak Crossing, Srinagar 190006</div></div>
         </a>
+        <div class="clink clink-static">
+          <div class="clink-icon">&#128339;</div>
+          <div><div class="clink-label">Hours</div><div class="clink-val">Open daily, 10 AM to 8:30 PM</div></div>
+        </div>
       </div>
     </div>
     <div>
       <a href="https://maps.app.goo.gl/72ELvt6b9xiNUhw47" target="_blank" rel="noopener" class="map-wrap r">
         <div class="map-pin">&#128205;</div>
         <div class="map-title">Pyramid Golds</div>
-        <div class="map-sub">Srinagar, Jammu and Kashmir</div>
+        <div class="map-sub">Habak Crossing, Srinagar, Jammu and Kashmir</div>
         <div class="map-btn">Open in Google Maps</div>
       </a>
     </div>
